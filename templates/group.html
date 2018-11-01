@@ -1,0 +1,332 @@
+﻿
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div style="margin: 5px;">
+    <div class="col-lg-6">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search for..." id="search" value="{{ name }}">
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button" onclick="search()">Search</button>
+            </span>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        {% if '_verdict_group.create' in permissions %}
+        <button type="button" onclick="add_group()" class="btn btn-primary active" style="margin-left: 100px;">添加群组</button>
+        {% endif %}
+    </div>
+    <div class="col-lg-12" style="margin-top: 10px;">
+    <table class="table table-bordered table-striped">
+		<thead>
+			<tr class="success">
+				<th width="10%">ID</th>
+				<th width="20%">群组名</th>
+				<th width="40%">备注</th>
+                <th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+        {% for obj in result %}
+			<tr>
+				<td>{{ obj.id }}</td>
+				<td>{{ obj.name }}</td>
+				<td>{{ obj.description }}</td>
+                <td>
+                    <div align="center">
+                        {% if '_verdict_group_permission.update' in permissions %}
+                        <span class="glyphicon glyphicon-cog" style="cursor: pointer;" aria-hidden="true" onclick="group_permission('{{ obj.id }}', '{{ obj.name }}')"></span>
+                        {% endif %}
+                        {% if '_verdict_group_user.update' in permissions %}
+                        <span class="glyphicon glyphicon-user" style="cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="review_members('{{ obj.id }}', '{{ obj.name }}')"></span>
+                        {% endif %}
+                        {% if '_verdict_group.update' in permissions %}
+                        <span class="glyphicon glyphicon-pencil" style="cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="update_group('{{ obj.id }}', '{{ obj.name }}', '{{ obj.description }}')"></span>
+                        {% endif %}
+                        {% if '_verdict_group.delete' in permissions %}
+                        <span class="glyphicon glyphicon-trash" style="cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="submit_delete('{{ obj.id }}', '{{ obj.name }}')"></span>
+                        {% endif %}
+                    </div>
+                </td>
+			</tr>
+        {% endfor %}
+		</tbody>
+	</table>
+    </div>
+    <div class="col-lg-12">
+    <div class="dataTables_info" role="status" aria-live="polite">共 {{ total }} 条, {{ total_pages }} 页</div>
+    <div class="dataTables_paginate paging_simple_numbers">
+        <a class="paginate_button previous" aria-controls="DataTables_Table_0" data-dt-idx="0" tabindex="0" id="previous" onclick="previous_page({{ page }})">上一页</a>
+        <span><a class="paginate_button current" aria-controls="DataTables_Table_0" data-dt-idx="1" tabindex="0">{{ page }}</a></span>
+        <a class="paginate_button next" aria-controls="DataTables_Table_0" data-dt-idx="2" tabindex="0" id="next" onclick="next_page({{ page }}, {{ total_pages }})">下一页</a>
+    </div>
+    </div>
+    </div>
+
+    <script type="text/javascript">
+
+    var wd = null;
+    var func = '$(".permission-list dt input:checkbox").click(function () {$(this).closest("dl").find("dd input:checkbox").prop("checked",$(this).prop("checked"));});$(".permission-list2 dd input:checkbox").click(function(){if($(this).prop("checked")){$(this).parents(".permission-list").find("dt").first().find("input:checkbox").prop("checked",true);}else{if($(this).parents(".permission-list").find(".permission-list2 dd").find("input:checked").length == 0){$(this).parents(".permission-list").find("dt").first().find("input:checkbox").prop("checked",false);}}});$(".permission-list2 dd input:checkbox").each(function(){if($(this).prop("checked")){$(this).parents(".permission-list").find("dt").first().find("input:checkbox").prop("checked",true);}})';
+
+    function review_members(group_id, group_name) {
+        var ld = layer.load(2);
+        var group_user_url = "{% url 'verdict:group_user_list' pk=0 %}".replace('/0/', '/' + group_id + '/');
+        $.get(group_user_url, function(result){
+            var data = result.result;
+            if(data.length == 0){
+                layer.alert('暂无成员');
+                layer.close(ld);
+                return;
+            }
+            var html = '<div style="overflow:auto; padding: 15px;">';
+            html += '<table class="table table-border table-bordered table-hover table-bg table-sort">';
+            html += '<thead><tr class="text-c"><th width="40%">用户名</th><th>邮箱</th></tr></thead>';
+            html += '<tbody>';
+            for(i=0;i<data.length;i++){
+                html += '<tr class="text-c"><td>' + data[i].name + '</td>' + '<td>' + data[i].email + '</td></tr>';
+            }
+            html += '</tbody></table></div>';
+            layer.close(ld);
+            wg = layer.open({
+              type: 1, //Page层类型
+              area: ['800px', '600px'],
+              title: '群组 [' + group_name + '] 成员',
+              shade: 0, //遮罩透明度
+              anim: 0, //0-6的动画形式，-1不开启
+              content: html,
+              scrollbar: true,
+            });
+        });
+    }
+
+    
+    function group_permission(group_id, group_name) {
+        var ld = layer.load(2);
+        var group_user_url = "{% url 'verdict:group_permission' pk=0 %}".replace('/0/', '/' + group_id + '/');
+        $.get(group_user_url, function(resp){
+            var data = resp.result;
+            var html = '<div style="overflow:auto; padding: 15px;">';
+            for(i=0;i<data.length;i++){
+                var pile = '<dl class="permission-list">' + '<dt onclick="foldselfwidgt(this, event)"><label>' +
+                    '<input type="checkbox" value="" name="pile" id="pile-' + i + '" class="valid">' +
+                    data[i].name + '</label></dt><dd><dl class="cl permission-list2"><dd>';
+                var children_data = data[i].children;
+                for(j=0;j<children_data.length;j++){
+                    var tmp_child = '<label style="padding: 5px;">';
+                    tmp_child += '<input type="checkbox" value="' + children_data[j].id + '"';
+                    if(children_data[j].has){
+                        tmp_child += ' checked="checked" ';
+                    }
+                    tmp_child += ' name="permission" id="permission-' + children_data[j].id + '">' +
+                    children_data[j].description + '</label>';
+                    pile += tmp_child;
+                }
+                pile += '</dd></dl></dd></dl>';
+                html += pile;
+            }
+            html += '<div align="center" style="margin-top: 10px;"><button class="btn btn-primary" type="button" onclick="submit_group_add_permission(' + group_id + ')">确认</button></div>';
+            html += '</div>';
+            html += '<script type="text/javascript">' + func + '<\/script>';
+            layer.close(ld);
+            wg = layer.open({
+              type: 1, //Page层类型
+              area: ['1000px', '600px'],
+              title: '群组 [' + group_name + '] 权限',
+              shade: 0, //遮罩透明度
+              anim: 0, //0-6的动画形式，-1不开启
+              content: html,
+              scrollbar: true,
+            });
+        });
+    }
+    
+    function submit_group_add_permission(group_id) {
+        var ld = layer.load(2);
+        var group_permission_url = "{% url 'verdict:group_permission' pk=0 %}".replace('/0/', '/' + group_id + '/');
+        var permission_values = [];
+        $('input:checkbox[name=permission]:checked').each(function(i){
+           permission_values.push($(this).val());
+        });
+        var data = new Object();
+        data['permissions'] = permission_values.join(',');
+        $.ajax({
+            url: group_permission_url,
+            type: 'PATCH',
+            data: data,
+            success: function(result) {
+                layer.msg('successful');
+                layer.close(wg);
+                window.location.reload();
+            },
+            error: function (resp) {
+                var error = resp['responseJSON']['error'];
+                layer.msg(error);
+                return;
+            }
+        }).always(function() {
+            layer.close(ld);
+          });
+    }
+    
+    
+    function foldselfwidgt(param, event) {
+        var ddv = $(param).parent().find("dd");
+        if(ddv.css("display") == "block") {
+            ddv.css("display", "none");
+        }else{
+            ddv.css("display", "block");
+        }
+    }
+    
+    function update_group(group_id, group_name, group_description) {
+        var html = '<div style="padding:30px;">' +
+            '<form class="form-horizontal">' +
+            '<div class="form-group">' +
+            '<label class="col-sm-3 control-label">ID：</label>' +
+            '<div class="col-sm-6">' +
+            '<input type="input" readonly="readonly" class="form-control" value="' + group_id + '">' +
+            '</div></div>' +
+            '<div class="form-group">' +
+            '<label class="col-sm-3 control-label">群组名称：</label>' +
+            '<div class="col-sm-8">' +
+            '<input type="input" class="form-control" value="' + group_name + '" id="group_name">' +
+            '</div></div>' +
+            '<div class="form-group">' +
+            '<label class="col-sm-3 control-label">描述：</label>' +
+            '<div class="col-sm-8">' +
+            '<input type="input" class="form-control" value="' + group_description + '" id="group_description">' +
+            '</div></div>' +
+            '<div class="form-group">' +
+            '<div class="col-sm-offset-5 col-sm-5">' +
+            '<button type="button" class="btn btn-primary" onclick="sumbit_update(' + group_id + ')">确认</button>' +
+            '</div></div></form></div>';
+        wg = layer.open({
+          type: 1, //Page层类型
+          area: ['600px', '300px'],
+          title: '修改权限',
+          shade: 0.6, //遮罩透明度
+          anim: 0, //0-6的动画形式，-1不开启
+          content: html,
+        });
+    }
+
+    function sumbit_update(group_id) {
+        var group_update_url = "{% url 'verdict:group_update_delete' pk=0 %}".replace('/0/', '/' + group_id + '/');
+        var name = $("#group_name").val();
+        var description = $("#group_description").val();
+        if(name.length == 0 || description.length == 0){
+            layer.msg('群组名称和描述不能为空');
+            return;
+        }
+        var ld = layer.load(2);
+        var data = new Object();
+        data['name'] = name;
+        data['description'] = description;
+        $.ajax({
+            url: group_update_url,
+            type: 'PATCH',
+            data: data,
+            success: function(result) {
+                layer.msg('successful');
+                layer.close(wg);
+                window.location.reload();
+            },
+            error: function (resp) {
+                var error = resp['responseJSON']['error'];
+                layer.msg(error);
+                return;
+            }
+        }).always(function() {
+            layer.close(ld);
+          });
+    }
+
+    function submit_delete(group_id, group_name) {
+        var group_delete_url = "{% url 'verdict:group_update_delete' pk=0 %}".replace('/0/', '/' + group_id + '/');
+        layer.msg('确定要删除群组 [' + group_name + '] 吗?', {
+          time: 0 //不自动关闭
+          ,btn: ['确定', '取消']
+          ,yes: function(index){
+            var ld = layer.load(2);
+            layer.close(index);
+            $.ajax({
+                url: group_delete_url,
+                type: 'DELETE',
+                success: function(result) {
+                    layer.msg('successful');
+                    window.location.reload();
+                },
+                error: function (resp) {
+                    var error = resp['responseJSON']['error'];
+                    layer.msg(error);
+                    return;
+                }
+            }).always(function() {
+                layer.close(ld);
+              });
+          }
+        });
+    }
+
+    function add_group() {
+        var html = '<div style="padding:50px;">' +
+        '<form class="form-horizontal">' +
+        '<div class="form-group">' +
+        '<label class="col-sm-3 control-label">群组名称：</label>' +
+        '<div class="col-sm-8">' +
+        '<input type="input" class="form-control" id="group_name">' +
+        '</div></div>' +
+        '<div class="form-group">' +
+        '<label class="col-sm-3 control-label">描述：</label>' +
+        '<div class="col-sm-8">' +
+        '<input type="input" class="form-control" id="group_description">' +
+        '</div></div>' +
+        '<div class="form-group">' +
+        '<div class="col-sm-offset-5 col-sm-5">' +
+        '<button type="button" class="btn btn-primary" onclick="sumbit_add()">确认</button>' +
+        '</div></div></form></div>';
+    wg = layer.open({
+      type: 1, //Page层类型
+      area: ['600px', '300px'],
+      title: '添加权限',
+      shade: 0.6, //遮罩透明度
+      anim: 0, //0-6的动画形式，-1不开启
+      content: html,
+    });
+}
+
+function sumbit_add() {
+    var group_add_url = "{% url 'verdict:group_view' %}";
+    var name = $("#group_name").val();
+    var description = $("#group_description").val();
+    if(name.length == 0 || description.length == 0){
+        layer.msg('群组名称和描述不能为空');
+        return;
+    }
+    var ld = layer.load(2);
+    var data = new Object();
+    data['name'] = name;
+    data['description'] = description;
+    $.ajax({
+        url: group_add_url,
+        type: 'POST',
+        data: data,
+        success: function(result) {
+            layer.msg('successful');
+            layer.close(wg);
+            window.location.reload();
+        },
+        error: function (resp) {
+            var error = resp['responseJSON']['error'];
+            layer.msg(error);
+            return;
+        }
+    }).always(function() {
+        layer.close(ld);
+      });
+}
+    
+    </script>
+    
+{% endblock content %}
