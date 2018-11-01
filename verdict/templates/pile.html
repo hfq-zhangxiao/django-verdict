@@ -36,7 +36,7 @@
 				<td>
                     <div>
                     {% for child in obj.children %}
-                        <div style="margin: 3px;border: 1px solid #886351;display: inline-block;position: relative;padding: 1px 6px 1px 1px;">
+                        <div style="margin: 3px;border: 2px solid #009688;display: inline-block;position: relative;padding: 1px 6px 1px 1px;">
                             <label class="pile-span">{{ child.description }}</label>
                             {% if '_verdict_pile_permission.update' in permissions %}
                             <span style="position: absolute; top: -8px; right: -2px; cursor: pointer;" aria-hidden="true" onclick="pile_delete_permission('{{ obj.id }}', '{{ child.id }}', '{{ child.description }}')">&times;</span>
