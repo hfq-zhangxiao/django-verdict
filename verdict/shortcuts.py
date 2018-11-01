@@ -10,7 +10,6 @@ def get_user_obj(lazy_user):
 
 
 def is_super_user(user):
-    return True
     result = True
     for k, v in super_user_filter.iteritems():
         if not hasattr(user, k) or getattr(user, k) != v:
