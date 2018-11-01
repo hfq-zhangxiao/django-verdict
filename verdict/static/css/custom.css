@@ -1,0 +1,42 @@
+.permission-list {
+    border: solid 1px #eee;
+}
+.formControls>* {
+    vertical-align: middle;
+}
+ul, ol, dl {
+    list-style-type: none;
+}
+dl, dt, dd, ul, ol, li {
+    margin: 0;
+    padding: 0;
+}
+* {
+    word-wrap: break-word;
+}
+dl {
+    list-style-type: none;
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+}
+.permission-list > dt {
+    background-color: #b8d1d8;
+    padding: 5px 10px;
+}
+dt {
+    display: block;
+}
+.cl, .clearfix {
+    zoom: 1;
+}
+.permission-list > dd > dl > dd {
+    margin-left: 40px;
+}
+dd {
+    display: block;
+    margin-inline-start: 0px;
+}
+

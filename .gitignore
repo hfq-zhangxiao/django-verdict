@@ -1,0 +1,12 @@
+*.pyc
+.project
+.pydevproject
+.settings
+venv
+.vscode
+.idea/*
+.DS_Store
+.pytest_cache
+.cache
+*.model
+*.func
