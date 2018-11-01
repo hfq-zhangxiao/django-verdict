@@ -4,7 +4,7 @@
 .settings
 venv
 .vscode
-.idea/*
+.idea
 .DS_Store
 .pytest_cache
 .cache
