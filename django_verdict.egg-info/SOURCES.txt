@@ -7,6 +7,8 @@ django_verdict.egg-info/SOURCES.txt
 django_verdict.egg-info/dependency_links.txt
 django_verdict.egg-info/requires.txt
 django_verdict.egg-info/top_level.txt
+migrations/0001_initial.py
+migrations/__init__.py
 verdict/__init__.py
 verdict/admin.py
 verdict/backends.py
