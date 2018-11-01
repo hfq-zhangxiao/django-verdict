@@ -1,5 +1,6 @@
 .permission-list {
     border: solid 1px #eee;
+    margin-top: 10px;
 }
 .formControls>* {
     vertical-align: middle;
@@ -23,7 +24,7 @@ dl {
     margin-inline-end: 0px;
 }
 .permission-list > dt {
-    background-color: #b8d1d8;
+    background-color: #009688;
     padding: 5px 10px;
 }
 dt {
