@@ -2,20 +2,29 @@ from django.contrib.auth import get_user_model
 
 from .exceptions import NoPermissionException, NoLoginException
 from .shortcuts import get_user_permissions_map
-from .utils import validate_permission
 
 
 class AuthorizedPermission(object):
 
-    def __init__(self, permission):
-        self.permissions = validate_permission(permission)
+    action_mapping = {
+        'GET': 'read',
+        'HEAD': 'read',
+        'POST': 'create',
+        'PUT': 'update',
+        'PATCH': 'update',
+        'DELETE': 'delete',
+        'OPTIONS': 'read',
+    }
 
-    def has_permission(self, request, *args, **kwargs):
-        if hasattr(request, 'user'):
-            user_permissions = get_user_permissions_map(request.user)
-            for p in self.permissions:
-                if p in user_permissions:
-                    return True
+    def has_permission(self, request, view):
+        if not hasattr(request, 'user'):
+            raise NoPermissionException()
+        full_permission = '{permission}.{action}'.format(
+            permission=getattr(view, 'permission', ''),
+            action=self.action_mapping.get(request._request.method.upper()),
+        )
+        if full_permission in get_user_permissions_map(request.user):
+            return True
         raise NoPermissionException()
 
 
