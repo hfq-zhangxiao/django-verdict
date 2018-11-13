@@ -35,7 +35,7 @@ Quick start
 
 2. Include the verdict URLconf in your project urls.py like this::
 
-    url(r'^verdict/', include('verdict.urls', namespace='verdict')),
+    url(r'^verdict/', include('verdict.urls')),
 
 3. Run `python manage.py migrate` to create the verdict models.
 
