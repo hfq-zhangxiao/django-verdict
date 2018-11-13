@@ -108,7 +108,7 @@ function update_pile(pile_id, pile_name) {
 
 
 function sumbit_update(pile_id) {
-    var pile_update_url = "{% url 'verdict:pile_update_delete' pk=0 %}".replace('/0/', '/' + pile_id + '/');
+    var pile_update_url = "{% url 'verdict_pile_update_delete' pk=0 %}".replace('/0/', '/' + pile_id + '/');
     var name = $("#pile_name").val();
     if(name.length == 0){
         layer.msg('权限名称不能为空');
@@ -138,7 +138,7 @@ function sumbit_update(pile_id) {
 
 
 function submit_delete(pile) {
-    var pile_delete_url = "{% url 'verdict:pile_update_delete' pk=0 %}".replace('/0/', '/' + pile + '/');
+    var pile_delete_url = "{% url 'verdict_pile_update_delete' pk=0 %}".replace('/0/', '/' + pile + '/');
     layer.msg('确定要删除该权限集吗?', {
       time: 0 //不自动关闭
       ,btn: ['确定', '取消']
@@ -166,7 +166,7 @@ function submit_delete(pile) {
 
 
 function pile_delete_permission(pile_id, permission_id, permission_description) {
-        var pile_permission_delete_url = "{% url 'verdict:pile_permission_delete' pile_id=0 pk=0 %}".replace('/0/', '/' + pile_id + '/').replace('/0/', '/' + permission_id + '/');
+        var pile_permission_delete_url = "{% url 'verdict_pile_permission_delete' pile_id=0 pk=0 %}".replace('/0/', '/' + pile_id + '/').replace('/0/', '/' + permission_id + '/');
         layer.msg('确定要删除权限 [' + permission_description + '] 吗?', {
           time: 0 //不自动关闭
           ,btn: ['确定', '取消']
@@ -215,7 +215,7 @@ function pile_add(pile_id) {
 }
 
 function sumbit_add() {
-    var permission_add_url = "{% url 'verdict:pile_view' %}";
+    var permission_add_url = "{% url 'verdict_pile_view' %}";
     var name = $("#pile_name").val();
     if(name.length == 0){
         layer.msg('权限集名称不能为空');
@@ -245,7 +245,7 @@ function sumbit_add() {
 
 
 function pile_add_member(pile_id, pile_name) {
-    var pile_vagrant_url = "{% url 'verdict:pile_vagrant' %}";
+    var pile_vagrant_url = "{% url 'verdict_pile_vagrant' %}";
     $.get(pile_vagrant_url, function(resp){
         var data = resp.result;
         var html = '<div style="overflow:auto;">';
@@ -267,7 +267,7 @@ function pile_add_member(pile_id, pile_name) {
 }
 
 function submit_pile_add_members(pile_id) {
-    var pile_permission_url = "{% url 'verdict:pile_permission' pk=0 %}".replace('/0/', '/' + pile_id + '/');
+    var pile_permission_url = "{% url 'verdict_pile_permission' pk=0 %}".replace('/0/', '/' + pile_id + '/');
     var permission_values = [];
     $('input:checkbox[name=permission]:checked').each(function(i){
        permission_values.push($(this).val());

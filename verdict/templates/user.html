@@ -60,7 +60,7 @@
     var wg = null;
 
     function join_group(user_id) {
-        var group_list_url = "{% url 'verdict:group_list' %}";
+        var group_list_url = "{% url 'verdict_group_list' %}";
         $.get(group_list_url, function(resp){
             var data = resp.result;
             var html = '<style>.select-style {margin-left: 115px;border: 3px solid #149ea5;width: 200px;border-radius: 3px;overflow: hidden;background: #fafafa no-repeat 90% 50%;}.select-style select {padding: 5px 8px;width: 100%;border: none;box-shadow: none;background: transparent;background-image: none;-webkit-appearance: none;}.select-style select:focus {outline: none;}</style>';
@@ -89,7 +89,7 @@
             return;
         }
         var ld = layer.load(2);
-        var group_user_url = "{% url 'verdict:group_user' gid=0 uid=0 %}".replace('/0/', '/' + group_id + '/').replace('/0/', '/' + user_id + '/');
+        var group_user_url = "{% url 'verdict_group_user' gid=0 uid=0 %}".replace('/0/', '/' + group_id + '/').replace('/0/', '/' + user_id + '/');
         $.ajax({
             url: group_user_url,
             type: 'POST',
@@ -112,7 +112,7 @@
     }
     
     function exit_group(user_id, group_id) {
-        var group_user_url = "{% url 'verdict:group_user' gid=0 uid=0 %}".replace('/0/', '/' + group_id + '/').replace('/0/', '/' + user_id + '/');
+        var group_user_url = "{% url 'verdict_group_user' gid=0 uid=0 %}".replace('/0/', '/' + group_id + '/').replace('/0/', '/' + user_id + '/');
         layer.msg('确定要退出群组吗?', {
           time: 0 //不自动关闭
           ,btn: ['确定', '取消']

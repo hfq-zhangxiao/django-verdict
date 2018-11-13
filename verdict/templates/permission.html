@@ -123,7 +123,7 @@ function add_permission() {
 }
 
 function sumbit_add() {
-    var permission_add_url = "{% url 'verdict:permission_view' %}";
+    var permission_add_url = "{% url 'verdict_permission_view' %}";
     var name = $("#permission_name").val();
     var description = $("#permission_description").val();
     if(name.length == 0 || description.length == 0){
@@ -154,7 +154,7 @@ function sumbit_add() {
 }
 
 function sumbit_update(permission_id) {
-    var permission_update_url = "{% url 'verdict:permission_update_delete' pk=0 %}".replace('/0/', '/' + permission_id + '/');
+    var permission_update_url = "{% url 'verdict_permission_update_delete' pk=0 %}".replace('/0/', '/' + permission_id + '/');
     var name = $("#permission_name").val();
     var description = $("#permission_description").val();
     if(name.length == 0 || description.length == 0){
@@ -185,7 +185,7 @@ function sumbit_update(permission_id) {
 }
 
 function submit_delete(permission_id) {
-        var permission_delete_url = "{% url 'verdict:permission_update_delete' pk=0 %}".replace('/0/', '/' + permission_id + '/');
+        var permission_delete_url = "{% url 'verdict_permission_update_delete' pk=0 %}".replace('/0/', '/' + permission_id + '/');
         layer.msg('确定要删除该权限吗?', {
           time: 0 //不自动关闭
           ,btn: ['确定', '取消']

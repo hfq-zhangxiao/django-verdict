@@ -23,16 +23,16 @@
           <a class="" href="javascript:;" style="text-decoration: none;">权限管理</a>
           <dl class="layui-nav-child">
             {% if '_verdict_user.read' in permissions %}
-                <dd><a href="{% url "verdict:user_view" %}" style="text-decoration: none;">用户列表</a></dd>
+                <dd><a href="{% url "verdict_user_view" %}" style="text-decoration: none;">用户列表</a></dd>
             {% endif %}
             {% if '_verdict_permission.read' in permissions %}
-                <dd><a href="{% url "verdict:permission_view" %}" style="text-decoration: none;">权限列表</a></dd>
+                <dd><a href="{% url "verdict_permission_view" %}" style="text-decoration: none;">权限列表</a></dd>
             {% endif %}
             {% if '_verdict_pile.read' in permissions %}
-                <dd><a href="{% url "verdict:pile_view" %}" style="text-decoration: none;">权限集合</a></dd>
+                <dd><a href="{% url "verdict_pile_view" %}" style="text-decoration: none;">权限集合</a></dd>
             {% endif %}
             {% if '_verdict_group.read' in permissions %}
-                <dd><a href="{% url "verdict:group_view" %}" style="text-decoration: none;">群组列表</a></dd>
+                <dd><a href="{% url "verdict_group_view" %}" style="text-decoration: none;">群组列表</a></dd>
             {% endif %}
           </dl>
         </li>

@@ -44,8 +44,6 @@ Quick start
 ```
 url(r'^verdict/', include('verdict.urls', namespace='verdict')),
 ```
-    
-   * `namespace='verdict'` is required.
 
 ##### 3. create the verdict models
 
