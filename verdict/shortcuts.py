@@ -18,6 +18,17 @@ def is_super_user(user):
     return result
 
 
+def has_manage_permission(user):
+    return Permission.objects.filter(
+        state=1,
+        name__startswith=default_permission_prefix,
+        grouppermission__state=1,
+        grouppermission__group__state=1,
+        grouppermission__group__groupuser__state=1,
+        grouppermission__group__groupuser__user=user
+    ).exists()
+
+
 def get_all_permissions():
     return Permission.objects.filter(state=1)
 
