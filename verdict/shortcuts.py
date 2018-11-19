@@ -19,6 +19,9 @@ def is_super_user(user):
 
 
 def has_manage_permission(user):
+    user = get_user_obj(user)
+    if is_super_user(user):
+        return True
     return Permission.objects.filter(
         state=1,
         name__startswith=default_permission_prefix,
