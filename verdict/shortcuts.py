@@ -99,6 +99,10 @@ def get_user_permissions_map(user):
     return dict(data)
 
 
+def get_user_permissions_name(user):
+    return get_user_permissions_map(user).keys()
+
+
 def get_user_custom_permissions_name(user):
     user = get_user_obj(user)
     if is_super_user(user):

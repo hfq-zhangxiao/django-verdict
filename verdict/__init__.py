@@ -3,7 +3,8 @@ from django.conf import settings
 
 
 user_model_label = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
-cache = getattr(settings, 'CACHE', {})
+verdict_settings = getattr(settings, 'VERDICT_SETTINGS', {})
+cache = verdict_settings.get('CACHE', {})
 
 if cache:
     redis_connection = {
