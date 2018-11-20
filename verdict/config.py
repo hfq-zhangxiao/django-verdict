@@ -25,7 +25,7 @@ default_permissions = (
     ('%spile.read' % default_permission_prefix, '权限集列表'),
     ('%spile_permission.update' % default_permission_prefix, '修改权限集权限'),
     ('%suser.read' % default_permission_prefix, '用户列表'),
-    ('%sgroup.create' % default_permission_prefix, '群组列表'),
+    ('%sgroup.create' % default_permission_prefix, '群组创建'),
     ('%sgroup.delete' % default_permission_prefix, '群组删除'),
     ('%sgroup.update' % default_permission_prefix, '群组修改'),
     ('%sgroup.read' % default_permission_prefix, '群组列表'),
