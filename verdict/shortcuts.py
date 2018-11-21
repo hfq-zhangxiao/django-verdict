@@ -4,6 +4,46 @@ from .models import Permission
 from .config import default_permission_prefix, super_user_filter
 
 
+def __get_user_permission_filter(user):
+    return dict(
+        grouppermission__state=1,
+        grouppermission__group__state=1,
+        grouppermission__group__groupuser__state=1,
+        grouppermission__group__groupuser__user=user
+    )
+
+
+def __get_permission_queryset():
+    queryset = Permission.objects.filter(state=1)
+    return queryset
+
+
+def __get_user_permission_queryset(user):
+    queryset = __get_permission_queryset()
+    if not is_super_user(user):
+        where = __get_user_permission_queryset(user)
+        queryset = queryset.filter(**where)
+    return queryset
+
+
+def __get_custom_permission_queryset(user=None):
+    queryset = __get_permission_queryset()
+    queryset = queryset.exclude(name__startswith=default_permission_prefix)
+    if user is not None and not is_super_user(user):
+        where = __get_user_permission_queryset(user)
+        queryset = queryset.filter(**where)
+    return queryset
+
+
+def __get_default_permission_queryset(user=None):
+    queryset = __get_permission_queryset()
+    queryset = queryset.filter(name__startswith=default_permission_prefix)
+    if user is not None and not is_super_user(user):
+        where = __get_user_permission_queryset(user)
+        queryset = queryset.filter(**where)
+    return queryset
+
+
 def get_user_obj(dj_request):
     return get_user(dj_request)
 
@@ -19,82 +59,26 @@ def is_super_user(user):
 
 def has_manage_permission(dj_request):
     user = get_user_obj(dj_request)
-    if is_super_user(user):
-        return True
-    return Permission.objects.filter(
-        state=1,
-        name__startswith=default_permission_prefix,
-        grouppermission__state=1,
-        grouppermission__group__state=1,
-        grouppermission__group__groupuser__state=1,
-        grouppermission__group__groupuser__user=user
-    ).exists()
-
-
-def _get_all_default_permissions_name():
-    permission = Permission.objects.filter(
-        state=1,
-        name__startswith=default_permission_prefix
-    ).values_list('name', 'state')
-    return dict(permission).keys()
-
-
-def _get_all_permissions_map():
-    permission = Permission.objects.filter(state=1).values_list('name', 'state')
-    return dict(permission)
-
-
-def _get_custom_permissions_name():
-    permission = Permission.objects.filter(state=1).exclude(
-        name__startswith=default_permission_prefix).values_list('name', 'state')
-    return dict(permission).keys()
-
-
-def get_user_default_permissions_name(dj_request):
-    user = get_user_obj(dj_request)
-    if is_super_user(user):
-        return _get_all_default_permissions_name()
-
-    data = Permission.objects.filter(
-        state=1,
-        name__startswith=default_permission_prefix,
-        grouppermission__state=1,
-        grouppermission__group__state=1,
-        grouppermission__group__groupuser__state=1,
-        grouppermission__group__groupuser__user=user
-    ).values_list('name', 'state')
-    return dict(data).keys()
+    queryset = __get_default_permission_queryset(user=user)
+    return queryset.exists()
 
 
 def get_user_permissions_map(dj_request):
     user = get_user_obj(dj_request)
-    if is_super_user(user):
-        return _get_all_permissions_map()
-
-    data = Permission.objects.filter(
-        state=1,
-        grouppermission__state=1,
-        grouppermission__group__state=1,
-        grouppermission__group__groupuser__state=1,
-        grouppermission__group__groupuser__user=user
-    ).values_list('name', 'state')
-    return dict(data)
+    queryset = __get_user_permission_queryset(user)
+    query = queryset.values_list('name', 'state')
+    return dict(query)
 
 
-def get_user_permissions_name(dj_request):
-    return get_user_permissions_map(dj_request).keys()
+def get_user_default_permissions_name(dj_request):
+    user = get_user_obj(dj_request)
+    queryset = __get_default_permission_queryset(user=user)
+    query = queryset.values_list('name', 'state')
+    return dict(query).keys()
 
 
 def get_user_custom_permissions_name(dj_request):
     user = get_user_obj(dj_request)
-    if is_super_user(user):
-        return _get_custom_permissions_name()
-
-    data = Permission.objects.exclude(name__startswith=default_permission_prefix).filter(
-        state=1,
-        grouppermission__state=1,
-        grouppermission__group__state=1,
-        grouppermission__group__groupuser__state=1,
-        grouppermission__group__groupuser__user=user
-    ).values_list('name', 'state')
-    return dict(data).keys()
+    queryset = __get_custom_permission_queryset(user=user)
+    query = queryset.values_list('name', 'state')
+    return dict(query).keys()
