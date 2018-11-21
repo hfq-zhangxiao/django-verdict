@@ -17,8 +17,6 @@ class AuthorizedPermission(object):
     }
 
     def has_permission(self, request, view):
-        if not hasattr(request, 'user'):
-            raise NoPermissionException()
         full_permission = '{permission}.{action}'.format(
             permission=getattr(view, 'permission', ''),
             action=self.action_mapping.get(request._request.method.upper()),
