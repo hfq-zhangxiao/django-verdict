@@ -60,7 +60,7 @@ class UserTemplate(generic.TemplateView):
             'total_pages': get_pages(total),
             'page': page,
             'name': name,
-            'permissions': get_user_default_permissions_name(user=getattr(self.request, 'user'))
+            'permissions': get_user_default_permissions_name(self.request)
         }
         return context
 
@@ -96,7 +96,7 @@ class PermissionViewSet(generic.View):
             'total_pages': get_pages(total),
             'page': page,
             'name': name,
-            'permissions': get_user_default_permissions_name(user=getattr(self.request, 'user'))
+            'permissions': get_user_default_permissions_name(self.request)
         }
         return render(request, self.template_name, context)
 
@@ -179,7 +179,7 @@ class PileViewSet(generic.View):
             'total_pages': get_pages(total),
             'page': page,
             'name': name,
-            'permissions': get_user_default_permissions_name(user=getattr(self.request, 'user'))
+            'permissions': get_user_default_permissions_name(self.request)
         }
         return render(request, self.template_name, context)
 
@@ -300,7 +300,7 @@ class GroupViewSet(generic.View):
             'total_pages': get_pages(total),
             'page': page,
             'name': name,
-            'permissions': get_user_default_permissions_name(user=getattr(self.request, 'user'))
+            'permissions': get_user_default_permissions_name(self.request)
         }
         return render(request, self.template_name, context)
 
@@ -357,7 +357,7 @@ class GroupPermissionViewSet(generic.View):
         result = list()
 
         piles = models.Pile.objects.filter(state=1)
-        user = get_user_obj(request.user)
+        user = get_user_obj(request)
         if not is_super_user(user):
             piles = piles.exclude(name__startswith=default_pile_name)
         for pile in piles:
@@ -381,7 +381,7 @@ class GroupPermissionViewSet(generic.View):
         has_query = models.Permission.objects.filter(
             state=1, grouppermission__state=1, grouppermission__group=obj)
         group_permission_set = list()
-        cur_user = get_user_obj(request.user)
+        cur_user = get_user_obj(request)
         if not is_super_user(cur_user):
             has_default_query = has_query.filter(name__startswith=default_permission_prefix)
             permissions.extend(map(lambda x: x['id'], has_default_query.values('id')))

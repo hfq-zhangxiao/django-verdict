@@ -13,7 +13,7 @@ def required_permission(permission):
         def wrapper(view, request, *args, **kwargs):
             if not hasattr(request, 'user'):
                 raise NoLoginException()
-            user_permissions = get_user_permissions_map(request.user)
+            user_permissions = get_user_permissions_map(request)
             for p in permissions:
                 if p in user_permissions:
                     return func(view, request, *args, **kwargs)
@@ -30,7 +30,7 @@ def required_func_permission(permission):
         def wrapper(request, *args, **kwargs):
             if not hasattr(request, 'user'):
                 raise NoLoginException()
-            user_permissions = get_user_permissions_map(request.user)
+            user_permissions = get_user_permissions_map(request)
             for p in permissions:
                 if p in user_permissions:
                     return func(request, *args, **kwargs)

@@ -1,25 +1,24 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user
 
 from .models import Permission
-from .config import default_permission_prefix, super_user_filter, user_always_filter
+from .config import default_permission_prefix, super_user_filter
 
 
-def get_user_obj(lazy_user):
-    pk = getattr(lazy_user, 'pk')
-    return get_user_model().objects.filter(**user_always_filter).filter(pk=pk).first()
+def get_user_obj(dj_request):
+    return get_user(dj_request)
 
 
 def is_super_user(user):
     result = True
-    for k, v in super_user_filter.iteritems():
+    for k, v in super_user_filter.items():
         if not hasattr(user, k) or getattr(user, k) != v:
             result = False
             break
     return result
 
 
-def has_manage_permission(user):
-    user = get_user_obj(user)
+def has_manage_permission(dj_request):
+    user = get_user_obj(dj_request)
     if is_super_user(user):
         return True
     return Permission.objects.filter(
@@ -32,48 +31,29 @@ def has_manage_permission(user):
     ).exists()
 
 
-def get_all_permissions():
-    return Permission.objects.filter(state=1)
-
-
-def get_custom_permissions():
-    return Permission.objects.filter(state=1).exclude(name__startswith=default_permission_prefix)
-
-
-def get_all_default_permissions_name():
-    data = Permission.objects.filter(
+def _get_all_default_permissions_name():
+    permission = Permission.objects.filter(
         state=1,
         name__startswith=default_permission_prefix
     ).values_list('name', 'state')
-    return dict(data).keys()
+    return dict(permission).keys()
 
 
-def get_all_permissions_map():
-    obj = get_all_permissions()
-    data = obj.values_list('name', 'state')
-    return dict(data)
+def _get_all_permissions_map():
+    permission = Permission.objects.filter(state=1).values_list('name', 'state')
+    return dict(permission)
 
 
-def get_all_permissions_name():
-    maps = get_all_permissions_map()
-    return maps.keys()
+def _get_custom_permissions_name():
+    permission = Permission.objects.filter(state=1).exclude(
+        name__startswith=default_permission_prefix).values_list('name', 'state')
+    return dict(permission).keys()
 
 
-def get_custom_permissions_map():
-    obj = get_custom_permissions()
-    data = obj.values_list('name', 'state')
-    return dict(data)
-
-
-def get_custom_permissions_name():
-    maps = get_custom_permissions_map()
-    return maps.keys()
-
-
-def get_user_default_permissions_name(user):
-    user = get_user_obj(user)
+def get_user_default_permissions_name(dj_request):
+    user = get_user_obj(dj_request)
     if is_super_user(user):
-        return get_all_default_permissions_name()
+        return _get_all_default_permissions_name()
 
     data = Permission.objects.filter(
         state=1,
@@ -86,11 +66,10 @@ def get_user_default_permissions_name(user):
     return dict(data).keys()
 
 
-def get_user_permissions_map(user):
-    if not isinstance(user, get_user_model()):
-        user = get_user_obj(user)
+def get_user_permissions_map(dj_request):
+    user = get_user_obj(dj_request)
     if is_super_user(user):
-        return get_all_permissions_map()
+        return _get_all_permissions_map()
 
     data = Permission.objects.filter(
         state=1,
@@ -102,14 +81,14 @@ def get_user_permissions_map(user):
     return dict(data)
 
 
-def get_user_permissions_name(user):
-    return get_user_permissions_map(user).keys()
+def get_user_permissions_name(dj_request):
+    return get_user_permissions_map(dj_request).keys()
 
 
-def get_user_custom_permissions_name(user):
-    user = get_user_obj(user)
+def get_user_custom_permissions_name(dj_request):
+    user = get_user_obj(dj_request)
     if is_super_user(user):
-        return get_custom_permissions_name()
+        return _get_custom_permissions_name()
 
     data = Permission.objects.exclude(name__startswith=default_permission_prefix).filter(
         state=1,

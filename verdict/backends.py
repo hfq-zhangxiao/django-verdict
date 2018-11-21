@@ -23,7 +23,7 @@ class AuthorizedPermission(object):
             permission=getattr(view, 'permission', ''),
             action=self.action_mapping.get(request._request.method.upper()),
         )
-        if full_permission in get_user_permissions_map(request.user):
+        if full_permission in get_user_permissions_map(request):
             return True
         raise NoPermissionException()
 
