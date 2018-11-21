@@ -21,7 +21,7 @@ def __get_permission_queryset():
 def __get_user_permission_queryset(user):
     queryset = __get_permission_queryset()
     if not is_super_user(user):
-        where = __get_user_permission_queryset(user)
+        where = __get_user_permission_filter(user)
         queryset = queryset.filter(**where)
     return queryset
 
@@ -30,7 +30,7 @@ def __get_custom_permission_queryset(user=None):
     queryset = __get_permission_queryset()
     queryset = queryset.exclude(name__startswith=default_permission_prefix)
     if user is not None and not is_super_user(user):
-        where = __get_user_permission_queryset(user)
+        where = __get_user_permission_filter(user)
         queryset = queryset.filter(**where)
     return queryset
 
@@ -39,7 +39,7 @@ def __get_default_permission_queryset(user=None):
     queryset = __get_permission_queryset()
     queryset = queryset.filter(name__startswith=default_permission_prefix)
     if user is not None and not is_super_user(user):
-        where = __get_user_permission_queryset(user)
+        where = __get_user_permission_filter(user)
         queryset = queryset.filter(**where)
     return queryset
 
