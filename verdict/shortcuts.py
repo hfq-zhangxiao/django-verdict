@@ -27,20 +27,20 @@ def __get_user_permission_queryset(user):
 
 
 def __get_custom_permission_queryset(user=None):
-    queryset = __get_permission_queryset()
+    if user is not None:
+        queryset = __get_user_permission_queryset(user)
+    else:
+        queryset = __get_permission_queryset()
     queryset = queryset.exclude(name__startswith=default_permission_prefix)
-    if user is not None and not is_super_user(user):
-        where = __get_user_permission_filter(user)
-        queryset = queryset.filter(**where)
     return queryset
 
 
 def __get_default_permission_queryset(user=None):
-    queryset = __get_permission_queryset()
+    if user is not None:
+        queryset = __get_user_permission_queryset(user)
+    else:
+        queryset = __get_permission_queryset()
     queryset = queryset.filter(name__startswith=default_permission_prefix)
-    if user is not None and not is_super_user(user):
-        where = __get_user_permission_filter(user)
-        queryset = queryset.filter(**where)
     return queryset
 
 
@@ -49,11 +49,12 @@ def get_user_obj(dj_request):
 
 
 def is_super_user(user):
-    result = True
+    result = False
     for k, v in super_user_filter.items():
         if not hasattr(user, k) or getattr(user, k) != v:
-            result = False
             break
+    else:
+        result = True
     return result
 
 
