@@ -1,9 +1,9 @@
 
 from django.conf import settings
 
+from .config import verdict_settings, user_model_label
 
-user_model_label = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
-verdict_settings = getattr(settings, 'VERDICT_SETTINGS', {})
+
 cache = verdict_settings.get('CACHE', {})
 
 if cache:
