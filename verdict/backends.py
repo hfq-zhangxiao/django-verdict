@@ -2,26 +2,28 @@ from django.contrib.auth import get_user_model
 
 from .exceptions import NoPermissionException, NoLoginException
 from .shortcuts import get_user_permissions_map
+from .config import action_enum
 
 
 class AuthorizedPermission(object):
 
-    action_mapping = {
-        'GET': 'read',
-        'HEAD': 'read',
-        'POST': 'create',
-        'PUT': 'update',
-        'PATCH': 'update',
-        'DELETE': 'delete',
-        'OPTIONS': 'read',
-    }
+    @staticmethod
+    def __get_real_permission(request, permission):
+        dj_request = getattr(request, '_request')
+        method = getattr(dj_request, 'method', '')
+        action = action_enum.get(method.upper())
+
+        return '{permission}.{action}'.format(
+            permission=permission, action=action
+        )
 
     def has_permission(self, request, view):
-        full_permission = '{permission}.{action}'.format(
-            permission=getattr(view, 'permission', ''),
-            action=self.action_mapping.get(request._request.method.upper()),
-        )
-        if full_permission in get_user_permissions_map(request):
+        if not hasattr(view, 'permission'):
+            raise NoPermissionException()
+        if not view.permission:
+            return True
+        real_permission = self.__get_real_permission(request, view.permission)
+        if real_permission in get_user_permissions_map(request):
             return True
         raise NoPermissionException()
 

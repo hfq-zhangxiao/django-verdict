@@ -34,3 +34,15 @@ default_permissions = (
 )
 
 default_pile_name = '权限管理'
+
+
+action_enum = {
+    'GET': 'read',
+    'HEAD': 'read',
+    'POST': 'create',
+    'PUT': 'update',
+    'PATCH': 'update',
+    'DELETE': 'delete',
+    'OPTIONS': 'read',
+}
+
