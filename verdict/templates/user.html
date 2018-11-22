@@ -32,11 +32,11 @@
                     {% if obj.group %}
                         {{ obj.group.name }}
                         {% if '_verdict_group_user.update' in permissions %}
-                        <span class="glyphicon glyphicon-remove" style="cursor: pointer;" aria-hidden="true" onclick="exit_group('{{ obj.id }}', '{{ obj.group.id }}')"></span>
+                        <span class="glyphicon glyphicon-remove" style="cursor: pointer;" aria-hidden="true" onclick="exit_group('{{ obj.id }}', '{{ obj.group.id }}')" title="退出群组"></span>
                         {% endif %}
                     {% else %}
                         {% if '_verdict_group_user.update' in permissions %}
-                        <span class="glyphicon glyphicon-plus" style="cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="join_group('{{ obj.id }}')"></span>
+                        <span class="glyphicon glyphicon-plus" style="cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="join_group('{{ obj.id }}')" title="加入群组"></span>
                         {% endif %}
                     {% endif %}
                 </td>

@@ -36,10 +36,10 @@
                 <td>
                     <div align="center">
                         {% if '_verdict_permission.update' in permissions %}
-                        <span class="glyphicon glyphicon-pencil" style="cursor: pointer;" aria-hidden="true" onclick="update_permission('{{ obj.id }}', '{{ obj.name }}', '{{ obj.description }}')"></span>
+                        <span class="glyphicon glyphicon-pencil" style="cursor: pointer;" aria-hidden="true" onclick="update_permission('{{ obj.id }}', '{{ obj.name }}', '{{ obj.description }}')" title="编辑"></span>
                         {% endif %}
                         {% if '_verdict_permission.delete' in permissions %}
-                        <span class="glyphicon glyphicon-trash" style="cursor: pointer;margin: 20px;" aria-hidden="true" onclick="submit_delete('{{ obj.id }}')"></span>
+                        <span class="glyphicon glyphicon-trash" style="cursor: pointer;margin: 20px;" aria-hidden="true" onclick="submit_delete('{{ obj.id }}')" title="删除"></span>
                         {% endif %}
                     </div>
                 </td>

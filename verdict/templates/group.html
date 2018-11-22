@@ -36,16 +36,16 @@
                 <td>
                     <div align="center">
                         {% if '_verdict_group_permission.update' in permissions %}
-                        <span class="glyphicon glyphicon-cog" style="cursor: pointer;" aria-hidden="true" onclick="group_permission('{{ obj.id }}', '{{ obj.name }}')"></span>
+                        <span class="glyphicon glyphicon-cog" style="cursor: pointer;" aria-hidden="true" onclick="group_permission('{{ obj.id }}', '{{ obj.name }}')" title="配置权限"></span>
                         {% endif %}
                         {% if '_verdict_group_user.update' in permissions %}
-                        <span class="glyphicon glyphicon-user" style="cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="review_members('{{ obj.id }}', '{{ obj.name }}')"></span>
+                        <span class="glyphicon glyphicon-user" style="cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="review_members('{{ obj.id }}', '{{ obj.name }}')" title="查看成员"></span>
                         {% endif %}
                         {% if '_verdict_group.update' in permissions %}
-                        <span class="glyphicon glyphicon-pencil" style="cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="update_group('{{ obj.id }}', '{{ obj.name }}', '{{ obj.description }}')"></span>
+                        <span class="glyphicon glyphicon-pencil" style="cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="update_group('{{ obj.id }}', '{{ obj.name }}', '{{ obj.description }}')" title="编辑"></span>
                         {% endif %}
                         {% if '_verdict_group.delete' in permissions %}
-                        <span class="glyphicon glyphicon-trash" style="cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="submit_delete('{{ obj.id }}', '{{ obj.name }}')"></span>
+                            <span class="glyphicon glyphicon-trash" style="cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="submit_delete('{{ obj.id }}', '{{ obj.name }}')" title="删除"></span>
                         {% endif %}
                     </div>
                 </td>

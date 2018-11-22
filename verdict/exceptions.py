@@ -6,7 +6,7 @@ class NoPermissionException(PermissionDenied):
 
 
 class NoLoginException(Exception):
-    message = 'no login'
+    status_code = 400
 
 
 class MissingFields(Exception):
