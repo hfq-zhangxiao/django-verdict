@@ -2,7 +2,7 @@ from django.contrib.auth import get_user
 from django.contrib.auth.models import AnonymousUser
 
 from .models import Permission
-from .config import default_permission_prefix, super_user_filter
+from .config import default_permission_prefix, super_user_filter, manage_menu_permissions
 from .exceptions import NoLoginException
 
 
@@ -13,6 +13,23 @@ def __get_user_permission_filter(user):
         grouppermission__group__groupuser__state=1,
         grouppermission__group__groupuser__user=user
     )
+
+
+def get_user_obj(dj_request):
+    user = get_user(dj_request)
+    if isinstance(user, AnonymousUser):
+        raise NoLoginException('please login')
+    return user
+
+
+def is_super_user(user):
+    result = False
+    for k, v in super_user_filter.items():
+        if not hasattr(user, k) or getattr(user, k) != v:
+            break
+    else:
+        result = True
+    return result
 
 
 def __get_permission_queryset():
@@ -46,26 +63,11 @@ def __get_default_permission_queryset(user=None):
     return queryset
 
 
-def get_user_obj(dj_request):
-    user = get_user(dj_request)
-    if isinstance(user, AnonymousUser):
-        raise NoLoginException('please login')
-    return user
-
-
-def is_super_user(user):
-    result = False
-    for k, v in super_user_filter.items():
-        if not hasattr(user, k) or getattr(user, k) != v:
-            break
-    else:
-        result = True
-    return result
-
-
 def has_manage_permission(dj_request):
     user = get_user_obj(dj_request)
+    permission_list = dict(manage_menu_permissions).keys()
     queryset = __get_default_permission_queryset(user=user)
+    queryset = queryset.filter(name__in=permission_list)
     return queryset.exists()
 
 

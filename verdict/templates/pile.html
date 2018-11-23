@@ -167,7 +167,7 @@ function submit_delete(pile) {
 
 function pile_delete_permission(pile_id, permission_id, permission_description) {
         var pile_permission_delete_url = "{% url 'verdict_pile_permission_delete' pile_id=0 pk=0 %}".replace('/0/', '/' + pile_id + '/').replace('/0/', '/' + permission_id + '/');
-        layer.msg('确定要删除权限 [' + permission_description + '] 吗?', {
+        layer.msg('确定要移除权限 [' + permission_description + '] 吗?', {
           time: 0 //不自动关闭
           ,btn: ['确定', '取消']
           ,yes: function(index){

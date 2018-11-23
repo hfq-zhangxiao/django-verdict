@@ -1,6 +1,7 @@
 # coding: utf-8
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.http.response import JsonResponse
@@ -12,7 +13,8 @@ from .shortcuts import get_user_default_permissions_name, get_user_obj, is_super
 from .decorator import required_permission
 from .utils import models_to_dict, get_offset_start_end, get_pages
 from .config import super_user_filter, user_always_exclude, user_always_filter, user_model_name_field, \
-    user_model_email_field, default_permissions, default_permission_prefix, default_pile_name
+    user_model_email_field, default_permissions, default_permission_prefix, default_pile_name, \
+    manage_menu_permissions
 
 
 default_pile, _ = models.Pile.objects.get_or_create(name=default_pile_name)
@@ -22,6 +24,17 @@ for dp in default_permissions:
     default_permission_pile_set.append(models.PermissionPile(permission=_permission, pile=default_pile))
 if not models.PermissionPile.objects.filter(pile=default_pile).exists():
     models.PermissionPile.objects.bulk_create(default_permission_pile_set)
+
+
+class Index(generic.RedirectView):
+
+    def get_redirect_url(self, *args, **kwargs):
+        permissions = get_user_default_permissions_name(self.request)
+        path_info = self.request.path
+        for permission, path in manage_menu_permissions:
+            if permission in permissions:
+                return '{prefix}{path}'.format(prefix=path_info.split('index')[0], path=path)
+        raise exceptions.NoPermissionException()
 
 
 class UserTemplate(generic.TemplateView):
@@ -35,9 +48,9 @@ class UserTemplate(generic.TemplateView):
         if name:
             if isinstance(name, unicode):
                 name = name.encode('utf-8')
-            where = dict()
-            where['%s__contains' % user_model_name_field] = name
-            query_set = self.query_set.filter(**where)
+            name_where = {'%s__contains' % user_model_name_field: name}
+            email_where = {'%s__contains' % user_model_email_field: name}
+            query_set = self.query_set.filter(Q(**name_where) | Q(**email_where))
         else:
             query_set = self.query_set
 
@@ -81,7 +94,7 @@ class PermissionViewSet(generic.View):
         if name:
             if isinstance(name, unicode):
                 name = name.encode('utf-8')
-            query_set = self.query_set.filter(name__contains=name)
+            query_set = self.query_set.filter(Q(name__contains=name) | Q(description__contains=name))
         else:
             query_set = self.query_set
 
@@ -285,7 +298,7 @@ class GroupViewSet(generic.View):
         if name:
             if isinstance(name, unicode):
                 name = name.encode('utf-8')
-            query_set = self.query_set.filter(name__contains=name)
+            query_set = self.query_set.filter(Q(name__contains=name) | Q(description__contains=name))
         else:
             query_set = self.query_set
 
@@ -293,7 +306,11 @@ class GroupViewSet(generic.View):
         start, end = get_offset_start_end(page)
 
         query = query_set.order_by('-id')
-        result = [models_to_dict(obj) for obj in query[start:end]]
+        result = list()
+        for obj in query[start:end]:
+            item = models_to_dict(obj)
+            item['member'] = models.GroupUser.objects.filter(state=1, group=obj).count()
+            result.append(item)
         context = {
             'result': result,
             'total': total,

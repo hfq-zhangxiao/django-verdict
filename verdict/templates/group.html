@@ -24,6 +24,7 @@
 				<th width="10%">ID</th>
 				<th width="20%">群组名</th>
 				<th width="40%">备注</th>
+                <th width="10%">成员数</th>
                 <th>操作</th>
 			</tr>
 		</thead>
@@ -33,6 +34,7 @@
 				<td>{{ obj.id }}</td>
 				<td>{{ obj.name }}</td>
 				<td>{{ obj.description }}</td>
+                <td>{{ obj.member }}</td>
                 <td>
                     <div align="center">
                         {% if '_verdict_group_permission.update' in permissions %}

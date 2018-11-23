@@ -14,6 +14,7 @@ user_always_exclude = verdict_settings.get('USER_ALWAYS_EXCLUDE', {})
 
 
 default_permission_prefix = '_verdict_'
+
 default_permissions = (
     ('%spermission.create' % default_permission_prefix, '添加权限'),
     ('%spermission.delete' % default_permission_prefix, '删除权限'),
@@ -46,3 +47,10 @@ action_enum = {
     'OPTIONS': 'read',
 }
 
+
+manage_menu_permissions = (
+    ('%suser.read' % default_permission_prefix, 'user'),
+    ('%spermission.read' % default_permission_prefix, 'permission'),
+    ('%spile.read' % default_permission_prefix, 'pile'),
+    ('%sgroup.read' % default_permission_prefix, 'group'),
+)

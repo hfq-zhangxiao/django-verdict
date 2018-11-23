@@ -6,6 +6,8 @@ from . import views
 
 
 urlpatterns = [
+    url(r'^index/?$', views.Index.as_view(), name='index'),
+
     url(r'^user/$', views.UserTemplate.as_view(), name='verdict_user_view'),
 
     url(r'^permission/$', views.PermissionViewSet.as_view(), name='verdict_permission_view'),
