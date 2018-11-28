@@ -18,9 +18,7 @@ class AuthorizedPermission(object):
         )
 
     def has_permission(self, request, view):
-        if not hasattr(view, 'permission'):
-            raise NoPermissionException()
-        if not view.permission:
+        if not hasattr(view, 'permission') or not view.permission:
             return True
         real_permission = self.__get_real_permission(request, view.permission)
         if real_permission in get_user_permissions_map(request):
