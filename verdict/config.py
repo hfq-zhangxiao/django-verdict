@@ -49,8 +49,8 @@ action_enum = {
 
 
 manage_menu_permissions = (
-    ('%suser.read' % default_permission_prefix, 'user'),
-    ('%spermission.read' % default_permission_prefix, 'permission'),
-    ('%spile.read' % default_permission_prefix, 'pile'),
-    ('%sgroup.read' % default_permission_prefix, 'group'),
+    ('%suser.read' % default_permission_prefix, 'verdict_user_view'),
+    ('%spermission.read' % default_permission_prefix, 'verdict_permission_view'),
+    ('%spile.read' % default_permission_prefix, 'verdict_pile_view'),
+    ('%sgroup.read' % default_permission_prefix, 'verdict_group_view'),
 )

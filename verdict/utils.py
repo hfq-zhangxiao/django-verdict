@@ -2,6 +2,7 @@ import datetime
 import math
 
 from .config import PAGE_LIMIT
+from .shortcuts import get_user_default_permissions_name
 
 
 def models_to_dict(obj, fields=None, exclude=None):
@@ -39,6 +40,15 @@ def validate_permission(permission):
     return permission
 
 
+def verify_page(request):
+    page = request.GET.get('page', 1)
+    try:
+        page = int(page)
+    except ValueError as _:
+        page = 1
+    return page if page > 0 else 1
+
+
 def get_pages(total, limit=PAGE_LIMIT):
     return int(math.ceil(total / (limit * 1.0)))
 
@@ -50,3 +60,16 @@ def get_offset_start_end(page, limit=PAGE_LIMIT):
         start = int(page - 1) * limit
     end = start + limit
     return start, end
+
+
+def list_result(dj_request, result, total, page, **kwargs):
+    context = {
+        'result': result,
+        'total': total,
+        'total_pages': get_pages(total),
+        'page': page,
+        'permissions': get_user_default_permissions_name(dj_request)
+    }
+    if kwargs:
+        context.update(kwargs)
+    return context

@@ -1,17 +1,18 @@
 # coding: utf-8
-from django.contrib.auth import get_user_model
+from django.urls import reverse
 from django.db import transaction
-from django.db.models import Q
-from django.shortcuts import render, get_object_or_404
 from django.views import generic
-from django.http.response import JsonResponse
+from django.db.models import Q
 from django.http import QueryDict
+from django.contrib.auth import get_user_model
+from django.shortcuts import render, get_object_or_404
+from django.http.response import JsonResponse
 
 from . import models
 from . import exceptions
 from .shortcuts import get_user_default_permissions_name, get_user_obj, is_super_user
 from .decorator import required_permission
-from .utils import models_to_dict, get_offset_start_end, get_pages
+from .utils import models_to_dict, get_offset_start_end, verify_page, list_result
 from .config import super_user_filter, user_always_exclude, user_always_filter, user_model_name_field, \
     user_model_email_field, default_permissions, default_permission_prefix, default_pile_name, \
     manage_menu_permissions
@@ -30,10 +31,9 @@ class Index(generic.RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         permissions = get_user_default_permissions_name(self.request)
-        path_info = self.request.path
-        for permission, path in manage_menu_permissions:
+        for permission, view in manage_menu_permissions:
             if permission in permissions:
-                return '{prefix}{path}'.format(prefix=path_info.split('index')[0], path=path)
+                return reverse(view)
         raise exceptions.NoPermissionException()
 
 
@@ -43,7 +43,7 @@ class UserTemplate(generic.TemplateView):
         **user_always_exclude).exclude(**super_user_filter)
 
     def get_context_data(self, **kwargs):
-        page = self.request.GET.get('page', 1)
+        page = verify_page(self.request)
         name = self.request.GET.get('name', '')
         if name:
             if isinstance(name, unicode):
@@ -67,15 +67,7 @@ class UserTemplate(generic.TemplateView):
                 'email': getattr(obj, user_model_email_field),
                 'group': dict(name=user_group.group.name, id=user_group.group.id) if user_group else ''
             })
-        context = {
-            'result': result,
-            'total': total,
-            'total_pages': get_pages(total),
-            'page': page,
-            'name': name,
-            'permissions': get_user_default_permissions_name(self.request)
-        }
-        return context
+        return list_result(self.request, result, total, page, name=name)
 
     @required_permission('_verdict_user.read')
     def get(self, request, *args, **kwargs):
@@ -89,7 +81,7 @@ class PermissionViewSet(generic.View):
 
     @required_permission('_verdict_permission.read')
     def get(self, request):
-        page = int(request.GET.get('page', 1))
+        page = verify_page(request)
         name = request.GET.get('name', '')
         if name:
             if isinstance(name, unicode):
@@ -103,14 +95,7 @@ class PermissionViewSet(generic.View):
 
         query = query_set.order_by('-id')
         result = [models_to_dict(obj) for obj in query[start:end]]
-        context = {
-            'result': result,
-            'total': total,
-            'total_pages': get_pages(total),
-            'page': page,
-            'name': name,
-            'permissions': get_user_default_permissions_name(self.request)
-        }
+        context = list_result(self.request, result, total, page, name=name)
         return render(request, self.template_name, context)
 
     @required_permission('_verdict_permission.create')
@@ -156,7 +141,8 @@ class PileViewSet(generic.View):
     template_name = 'pile.html'
     query_set = models.Pile.objects.filter(state=1).exclude(id=default_pile.id)
 
-    def _get_pile_child(self, obj):
+    @staticmethod
+    def _get_pile_child(obj):
         child = dict()
         child['id'] = obj.permission.id
         child['description'] = obj.permission.description
@@ -164,7 +150,7 @@ class PileViewSet(generic.View):
 
     @required_permission('_verdict_pile.read')
     def get(self, request):
-        page = int(request.GET.get('page', 1))
+        page = verify_page(request)
         name = request.GET.get('name', '')
         if name:
             if isinstance(name, unicode):
@@ -186,14 +172,7 @@ class PileViewSet(generic.View):
                     state=1, pile=obj
                 )]
             })
-        context = {
-            'result': result,
-            'total': total,
-            'total_pages': get_pages(total),
-            'page': page,
-            'name': name,
-            'permissions': get_user_default_permissions_name(self.request)
-        }
+        context = list_result(self.request, result, total, page, name=name)
         return render(request, self.template_name, context)
 
     @required_permission('_verdict_pile.create')
@@ -293,7 +272,7 @@ class GroupViewSet(generic.View):
 
     @required_permission('_verdict_group.read')
     def get(self, request):
-        page = request.GET.get('page', 1)
+        page = verify_page(request)
         name = request.GET.get('name', '')
         if name:
             if isinstance(name, unicode):
@@ -311,14 +290,7 @@ class GroupViewSet(generic.View):
             item = models_to_dict(obj)
             item['member'] = models.GroupUser.objects.filter(state=1, group=obj).count()
             result.append(item)
-        context = {
-            'result': result,
-            'total': total,
-            'total_pages': get_pages(total),
-            'page': page,
-            'name': name,
-            'permissions': get_user_default_permissions_name(self.request)
-        }
+        context = list_result(self.request, result, total, page, name=name)
         return render(request, self.template_name, context)
 
     @required_permission('_verdict_group.create')
@@ -356,7 +328,8 @@ class GroupUpdate(generic.View):
 
 class GroupPermissionViewSet(generic.View):
 
-    def _get_pile_child(self, obj, group_permissions):
+    @staticmethod
+    def _get_pile_child(obj, group_permissions):
         child = dict()
         child['id'] = obj.permission.id
         child['description'] = obj.permission.description
@@ -423,7 +396,8 @@ class GroupPermissionViewSet(generic.View):
 
 class GroupUserList(generic.View):
 
-    def _get_user_info(self, obj):
+    @staticmethod
+    def _get_user_info(obj):
         user = dict()
         user['name'] = getattr(obj.user, user_model_name_field)
         user['email'] = getattr(obj.user, user_model_email_field)
