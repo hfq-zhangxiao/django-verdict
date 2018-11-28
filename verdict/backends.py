@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 
 from .exceptions import NoPermissionException, NoLoginException
-from .shortcuts import get_user_permissions_map
+from .shortcuts import get_user_permissions_map, get_user_obj
 from .config import action_enum
 
 
@@ -29,9 +29,7 @@ class AuthorizedPermission(object):
 class OauthBackend(object):
 
     def authenticate(self, request, **kwargs):
-        if not hasattr(request, 'user'):
-            raise NoLoginException()
-        user = request.user
+        user = get_user_obj(request)
         if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
             raise NoLoginException()
         return True
