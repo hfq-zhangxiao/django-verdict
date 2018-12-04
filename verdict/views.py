@@ -1,5 +1,8 @@
 # coding: utf-8
-from django.urls import reverse
+try:
+    from django.urls import reverse
+except ImportError as _:
+    from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.views import generic
 from django.db.models import Q
