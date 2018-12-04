@@ -63,7 +63,7 @@
         var group_list_url = "{% url 'verdict_group_list' %}";
         $.get(group_list_url, function(resp){
             var data = resp.result;
-            var html = '<style>.select-style {margin-left: 115px;border: 3px solid #149ea5;width: 200px;border-radius: 3px;overflow: hidden;background: #fafafa no-repeat 90% 50%;}.select-style select {padding: 5px 8px;width: 100%;border: none;box-shadow: none;background: transparent;background-image: none;-webkit-appearance: none;}.select-style select:focus {outline: none;}</style>';
+            var html = '<style>.select-style {margin-left: 115px;border: 3px solid #20a0ff;width: 200px;border-radius: 3px;overflow: hidden;background: #fafafa no-repeat 90% 50%;}.select-style select {padding: 5px 8px;width: 100%;border: none;box-shadow: none;background: transparent;background-image: none;-webkit-appearance: none;}.select-style select:focus {outline: none;}</style>';
             html += '<div class="select-style" align="center"><select id="group_value">';
             html += '<option value="">请选择</option>'
             for(i=0;i<data.length;i++){
@@ -76,7 +76,9 @@
               area: ['500px', '300px'],
               title: '加入群组',
               shade: 0.6, //遮罩透明度
+              shadeClose: false,
               anim: 0, //0-6的动画形式，-1不开启
+              closeBtn: 2,
               content: '<div style="padding:20px;margin-top:30px;">' + html + '</div>',
             });
         });

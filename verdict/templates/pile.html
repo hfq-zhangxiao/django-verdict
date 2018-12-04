@@ -36,7 +36,7 @@
 				<td>
                     <div>
                     {% for child in obj.children %}
-                        <div style="margin: 3px;border: 2px solid #009688;display: inline-block;position: relative;padding: 1px 6px 1px 1px;">
+                        <div style="margin: 3px;border: 2px solid #a3cced;;display: inline-block;position: relative;padding: 1px 6px 1px 1px;">
                             <label class="pile-span">{{ child.description }}</label>
                             {% if '_verdict_pile_permission.update' in permissions %}
                             <span style="position: absolute; top: -8px; right: -2px; cursor: pointer;" aria-hidden="true" onclick="pile_delete_permission('{{ obj.id }}', '{{ child.id }}', '{{ child.description }}')" title="删除成员">&times;</span>
@@ -94,14 +94,16 @@ function update_pile(pile_id, pile_name) {
         '</div></div>' +
         '<div class="form-group">' +
         '<div class="col-sm-offset-5 col-sm-5">' +
-        '<button type="button" class="btn btn-primary" onclick="sumbit_update(' + pile_id + ')">确认</button>' +
+        '<button type="button" class="btn btn-primary" style="margin-top: 10px;" onclick="sumbit_update(' + pile_id + ')">确认</button>' +
         '</div></div></form></div>';
     wg = layer.open({
       type: 1, //Page层类型
       area: ['600px', '300px'],
       title: '修改权限集',
       shade: 0.6, //遮罩透明度
+      shadeClose: false,
       anim: 0, //0-6的动画形式，-1不开启
+      closeBtn: 2,
       content: html,
     });
 }
@@ -202,14 +204,16 @@ function pile_add(pile_id) {
         '</div></div>' +
         '<div class="form-group">' +
         '<div class="col-sm-offset-4 col-sm-4">' +
-        '<button type="button" class="btn btn-primary" onclick="sumbit_add()">确认</button>' +
+        '<button type="button" class="btn btn-primary" style="margin-top: 30px;" onclick="sumbit_add()">确认</button>' +
         '</div></div></form></div>';
     wg = layer.open({
       type: 1, //Page层类型
       area: ['600px', '300px'],
       title: '添加权限集',
       shade: 0.6, //遮罩透明度
+      shadeClose: false,
       anim: 0, //0-6的动画形式，-1不开启
+      closeBtn: 2,
       content: html,
     });
 }
@@ -253,13 +257,15 @@ function pile_add_member(pile_id, pile_name) {
             html += '<label style="margin: 10px;"><input type="checkbox" name="permission" value="' + data[i].id + '">' + data[i].description + '</label>';
         }
         html += '</div>';
-        html += '<div align="center" style="margin: 10px;"><button class="btn btn-primary" type="button" onclick="submit_pile_add_members(' + pile_id + ')">确认</button></div>';
+        html += '<div align="center" style="margin: 30px;"><button class="btn btn-primary" type="button" onclick="submit_pile_add_members(' + pile_id + ')">确认</button></div>';
         wg = layer.open({
           type: 1, //Page层类型
           area: ['800px', '600px'],
           title: '权限集 [' + pile_name + '] 添加权限',
-          shade: 0, //遮罩透明度
+          shade: 0.6, //遮罩透明度
+          shadeClose: false,
           anim: 0, //0-6的动画形式，-1不开启
+          closeBtn: 2,
           content: html,
           scrollbar: true,
         });
