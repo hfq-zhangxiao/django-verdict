@@ -4,11 +4,11 @@
 {% block content %}
 
 <div style="margin: 5px;">
-    <div class="col-lg-6">
+    <div class="col-lg-4">
         <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search for..." id="search" value="{{ name }}">
+            <input type="text" class="form-control" placeholder="请输入..." id="search" value="{{ name }}">
             <span class="input-group-btn">
-                <button class="btn btn-default" type="button" onclick="search()">Search</button>
+                <button class="btn btn-default" type="button" onclick="search()">搜索</button>
             </span>
         </div>
     </div>
@@ -32,11 +32,11 @@
                     {% if obj.group %}
                         {{ obj.group.name }}
                         {% if '_verdict_group_user.update' in permissions %}
-                        <span class="glyphicon glyphicon-remove" style="cursor: pointer;" aria-hidden="true" onclick="exit_group('{{ obj.id }}', '{{ obj.group.id }}')" title="退出群组"></span>
+                        <span class="glyphicon glyphicon-remove" style="cursor: pointer;color: #20a0ff;" aria-hidden="true" onclick="exit_group('{{ obj.id }}', '{{ obj.group.id }}')" title="退出群组"></span>
                         {% endif %}
                     {% else %}
                         {% if '_verdict_group_user.update' in permissions %}
-                        <span class="glyphicon glyphicon-plus" style="cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="join_group('{{ obj.id }}')" title="加入群组"></span>
+                        <span class="glyphicon glyphicon-plus" style="color: #20a0ff;cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="join_group('{{ obj.id }}')" title="加入群组"></span>
                         {% endif %}
                     {% endif %}
                 </td>

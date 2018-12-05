@@ -4,19 +4,18 @@
 {% block content %}
 
 <div style="margin: 5px;">
-    <div class="col-lg-6">
+    <div class="col-lg-4">
         <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search for..." id="search" value="{{ name }}">
+            <input type="text" class="form-control" placeholder="请输入..." id="search" value="{{ name }}">
             <span class="input-group-btn">
-                <button class="btn btn-default" type="button" onclick="search()">Search</button>
+                <button class="btn btn-default" type="button" onclick="search()">搜索</button>
             </span>
+
         </div>
     </div>
-    <div class="col-lg-6">
-        {% if '_verdict_pile.create' in permissions %}
-        <button type="button" onclick="pile_add()" class="btn btn-primary active" style="margin-left: 100px;">添加权限集</button>
-        {% endif %}
-    </div>
+    {% if '_verdict_pile.create' in permissions %}
+    <button type="button" onclick="pile_add()" class="btn btn-primary active" style="margin-left: 100px;">添加权限集</button>
+    {% endif %}
 
 <div class="col-lg-12" style="margin-top: 10px;">
     <table class="table table-bordered table-striped">
@@ -39,22 +38,22 @@
                         <div style="margin: 3px;border: 2px solid #a3cced;;display: inline-block;position: relative;padding: 1px 6px 1px 1px;">
                             <label class="pile-span">{{ child.description }}</label>
                             {% if '_verdict_pile_permission.update' in permissions %}
-                            <span style="position: absolute; top: -8px; right: -2px; cursor: pointer;" aria-hidden="true" onclick="pile_delete_permission('{{ obj.id }}', '{{ child.id }}', '{{ child.description }}')" title="删除成员">&times;</span>
+                            <span style="color: #20a0ff;position: absolute; top: -8px; right: -2px; cursor: pointer;" aria-hidden="true" onclick="pile_delete_permission('{{ obj.id }}', '{{ child.id }}', '{{ child.description }}')" title="删除成员">&times;</span>
                             {% endif %}
                         </div>
                     {% endfor %}
                     {% if '_verdict_pile_permission.update' in permissions %}
-                        <span style="cursor: pointer;margin-left: 10px;" class="glyphicon glyphicon-plus" aria-hidden="true" onclick="pile_add_member('{{ obj.id }}', '{{ obj.name }}')" title="添加成员"></span>
+                        <span style="color: #20a0ff;cursor: pointer;margin-left: 10px;" class="glyphicon glyphicon-plus" aria-hidden="true" onclick="pile_add_member('{{ obj.id }}', '{{ obj.name }}')" title="添加成员"></span>
                     {% endif %}
                     </div>
                 </td>
                 <td>
                     <div align="center">
                         {% if '_verdict_pile.update' in permissions %}
-                        <span class="glyphicon glyphicon-pencil" style="cursor: pointer;" aria-hidden="true" onclick="update_pile('{{ obj.id }}', '{{ obj.name }}')" title="编辑"></span>
+                        <span class="glyphicon glyphicon-pencil" style="color: #20a0ff;cursor: pointer;" aria-hidden="true" onclick="update_pile('{{ obj.id }}', '{{ obj.name }}')" title="编辑"></span>
                         {% endif %}
                         {% if '_verdict_pile.delete' in permissions %}
-                        <span class="glyphicon glyphicon-trash" style="cursor: pointer;margin: 20px;" aria-hidden="true" onclick="submit_delete('{{ obj.id }}')" title="删除"></span>
+                        <span class="glyphicon glyphicon-trash" style="color: #20a0ff;cursor: pointer;margin: 20px;" aria-hidden="true" onclick="submit_delete('{{ obj.id }}')" title="删除"></span>
                         {% endif %}
                     </div>
                 </td>
