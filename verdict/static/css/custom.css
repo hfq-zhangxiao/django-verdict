@@ -41,9 +41,15 @@ dd {
     margin-inline-start: 0px;
 }
 
+
+.body-div {
+    margin: 5px;
+}
+
 .search-div {
     width: 50%;
     display: inline-block;
     float: left;
     margin-left: 15px;
+    margin-bottom: 10px;
 }
