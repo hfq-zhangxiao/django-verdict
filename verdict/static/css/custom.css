@@ -41,3 +41,9 @@ dd {
     margin-inline-start: 0px;
 }
 
+.search-div {
+    width: 50%;
+    display: inline-block;
+    float: left;
+    margin-left: 15px;
+}
