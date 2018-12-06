@@ -21,22 +21,22 @@
     <table class="table table-bordered table-striped">
 		<thead>
 			<tr class="success">
-				<th width="5%">ID</th>
-				<th width="10%">权限集名称</th>
-				<th width="75%">成员</th>
-                <th>操作</th>
+				<th width="5%" class="tb-th">ID</th>
+				<th width="10%" class="tb-th">权限集名称</th>
+				<th width="75%" class="tb-th">成员</th>
+                <th class="tb-th">操作</th>
 			</tr>
 		</thead>
 		<tbody>
         {% for obj in result %}
 			<tr>
-				<td>{{ obj.id }}</td>
-				<td>{{ obj.name }}</td>
+				<td class="tb-th">{{ obj.id }}</td>
+				<td class="tb-th">{{ obj.name }}</td>
 				<td>
                     <div>
                     {% for child in obj.children %}
                         <div style="margin: 3px;border: 2px solid #a3cced;;display: inline-block;position: relative;padding: 1px 6px 1px 1px;">
-                            <label class="pile-span">{{ child.description }}</label>
+                            <label style="margin-bottom: 0px;">{{ child.description }}</label>
                             {% if '_verdict_pile_permission.update' in permissions %}
                             <span style="color: #20a0ff;position: absolute; top: -8px; right: -2px; cursor: pointer;" aria-hidden="true" onclick="pile_delete_permission('{{ obj.id }}', '{{ child.id }}', '{{ child.description }}')" title="删除成员">&times;</span>
                             {% endif %}
@@ -47,7 +47,7 @@
                     {% endif %}
                     </div>
                 </td>
-                <td>
+                <td class="tb-th">
                     <div align="center">
                         {% if '_verdict_pile.update' in permissions %}
                         <span class="glyphicon glyphicon-pencil" style="color: #20a0ff;cursor: pointer;" aria-hidden="true" onclick="update_pile('{{ obj.id }}', '{{ obj.name }}')" title="编辑"></span>
@@ -249,14 +249,21 @@ function sumbit_add() {
 
 function pile_add_member(pile_id, pile_name) {
     var pile_vagrant_url = "{% url 'verdict_pile_vagrant' %}";
+    var ld = layer.load(2);
     $.get(pile_vagrant_url, function(resp){
         var data = resp.result;
+        if(!data.length){
+            layer.alert('暂无可添加的权限');
+            layer.close(ld);
+            return;
+        }
         var html = '<div style="overflow:auto;">';
         for(i=0;i<data.length;i++){
-            html += '<label style="margin: 10px;"><input type="checkbox" name="permission" value="' + data[i].id + '">' + data[i].description + '</label>';
+            html += '<label style="margin: 10px;"><input style="margin: 4px 4px 0;" type="checkbox" name="permission" value="' + data[i].id + '">' + data[i].description + '</label>';
         }
         html += '</div>';
         html += '<div align="center" style="margin: 30px;"><button class="btn btn-primary" type="button" onclick="submit_pile_add_members(' + pile_id + ')">确认</button></div>';
+        layer.close(ld);
         wg = layer.open({
           type: 1, //Page层类型
           area: ['800px', '600px'],

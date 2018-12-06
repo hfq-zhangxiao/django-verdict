@@ -24,7 +24,7 @@ dl {
     margin-inline-end: 0px;
 }
 .permission-list > dt {
-    background-color: #a3cced;
+    background-color: #C6E0FF;
     padding: 5px 10px;
 }
 dt {
@@ -52,4 +52,9 @@ dd {
     float: left;
     margin-left: 15px;
     margin-bottom: 10px;
+}
+
+.tb-th {
+    text-align: center;/** 设置水平方向居中 */
+    vertical-align: middle/** 设置垂直方向居中 */
 }

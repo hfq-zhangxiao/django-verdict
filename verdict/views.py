@@ -200,7 +200,7 @@ class PileVagrantViewSet(generic.View):
     @required_permission('_verdict_pile.update')
     def get(self, request):
         result = models.Permission.objects.filter(state=1, permissionpile__isnull=True).exclude(
-            name__startswith=default_permission_prefix).values('description', 'id')
+            name__startswith=default_permission_prefix).order_by('name').values('description', 'id')
         return JsonResponse(data=dict(result=list(result)))
 
 

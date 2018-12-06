@@ -16,19 +16,19 @@
     <table class="table table-bordered table-striped">
 		<thead>
 			<tr class="success">
-				<th width="10%">ID</th>
-				<th width="30%">用户名</th>
-				<th width="40%">邮箱</th>
-				<th>群组</th>
+				<th width="10%" class="tb-th">ID</th>
+				<th width="30%" class="tb-th">用户名</th>
+				<th width="40%" class="tb-th">邮箱</th>
+				<th class="tb-th">群组</th>
 			</tr>
 		</thead>
 		<tbody>
         {% for obj in result %}
 			<tr>
-				<td>{{ obj.id }}</td>
-				<td>{{ obj.name }}</td>
-				<td>{{ obj.email }}</td>
-				<td>
+				<td class="tb-th">{{ obj.id }}</td>
+				<td class="tb-th">{{ obj.name }}</td>
+				<td class="tb-th">{{ obj.email }}</td>
+				<td class="tb-th">
                     {% if obj.group %}
                         {{ obj.group.name }}
                         {% if '_verdict_group_user.update' in permissions %}
