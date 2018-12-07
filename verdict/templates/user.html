@@ -12,11 +12,11 @@
             </span>
         </div>
     </div>
-<div class="col-lg-12" style="clear: both">
+    <div class="col-lg-12" style="clear: both">
     <table class="table table-bordered table-striped">
 		<thead>
 			<tr class="success">
-				<th width="10%" class="tb-th">ID</th>
+				<th width="5%" class="tb-th">序号</th>
 				<th width="30%" class="tb-th">用户名</th>
 				<th width="40%" class="tb-th">邮箱</th>
 				<th class="tb-th">群组</th>
@@ -25,18 +25,18 @@
 		<tbody>
         {% for obj in result %}
 			<tr>
-				<td class="tb-th">{{ obj.id }}</td>
+				<td class="tb-th">{{ forloop.counter }}</td>
 				<td class="tb-th">{{ obj.name }}</td>
 				<td class="tb-th">{{ obj.email }}</td>
 				<td class="tb-th">
                     {% if obj.group %}
                         {{ obj.group.name }}
                         {% if '_verdict_group_user.update' in permissions %}
-                        <span class="glyphicon glyphicon-remove" style="cursor: pointer;color: #20a0ff;" aria-hidden="true" onclick="exit_group('{{ obj.id }}', '{{ obj.group.id }}')" title="退出群组"></span>
+                            <span class="glyphicon glyphicon-remove" style="cursor: pointer;color: #20a0ff;" aria-hidden="true" onclick="exit_group('{{ obj.id }}', '{{ obj.group.id }}')" title="退出群组"></span>
                         {% endif %}
                     {% else %}
                         {% if '_verdict_group_user.update' in permissions %}
-                        <span class="glyphicon glyphicon-plus" style="color: #20a0ff;cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="join_group('{{ obj.id }}')" title="加入群组"></span>
+                            <span class="glyphicon glyphicon-plus" style="color: #20a0ff;cursor: pointer;margin-left: 20px;" aria-hidden="true" onclick="join_group('{{ obj.id }}', '{{ obj.name }}')" title="加入群组"></span>
                         {% endif %}
                     {% endif %}
                 </td>
@@ -44,7 +44,7 @@
         {% endfor %}
 		</tbody>
 	</table>
-</div>
+    </div>
 
 <div class="col-lg-12">
     <div class="dataTables_info" role="status" aria-live="polite">共 {{ total }} 条, {{ total_pages }} 页</div>
@@ -59,7 +59,7 @@
 
     var wg = null;
 
-    function join_group(user_id) {
+    function join_group(user_id, user_name) {
         var group_list_url = "{% url 'verdict_group_list' %}";
         $.get(group_list_url, function(resp){
             var data = resp.result;
@@ -74,7 +74,7 @@
             wg = layer.open({
               type: 1, //Page层类型
               area: ['500px', '300px'],
-              title: '加入群组',
+              title: '用户[' + user_name + ']加入群组',
               shade: 0.6, //遮罩透明度
               shadeClose: false,
               anim: 0, //0-6的动画形式，-1不开启
