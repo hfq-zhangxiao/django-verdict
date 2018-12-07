@@ -7,6 +7,7 @@ from .config import verdict_settings, user_model_label
 cache = verdict_settings.get('CACHE', {})
 
 if cache:
+    prefix = cache.get('prefix', 'verdict')
     redis_connection = {
         'host': cache.get('host', ''),
         'port': cache.get('port', ''),
@@ -20,3 +21,4 @@ if cache:
     }
     settings.CACHEOPS_REDIS = redis_connection
     settings.CACHEOPS = cache_ops
+    settings.CACHEOPS_PREFIX = lambda query: '%s:' % prefix
