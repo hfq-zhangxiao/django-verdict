@@ -90,7 +90,7 @@
             layer.close(ld);
             wg = layer.open({
               type: 1, //Page层类型
-              area: ['800px', '600px'],
+              area: ['800px', '500px'],
               title: '群组 [' + group_name + '] 成员',
               shade: 0.6, //遮罩透明度
               shadeClose: false,
@@ -98,6 +98,7 @@
               content: html,
               closeBtn: 2,
               scrollbar: true,
+              move: false,
             });
         });
     }
@@ -111,7 +112,7 @@
             var html = '<div style="overflow:auto; padding: 15px;">';
             for(i=0;i<data.length;i++){
                 var pile = '<dl class="permission-list">' + '<dt onclick="foldselfwidgt(this, event)"><label>' +
-                    '<input type="checkbox" value="" name="pile" id="pile-' + i + '" class="valid">' +
+                    '<input style="margin:4px 4px 0;" type="checkbox" value="" name="pile" id="pile-' + i + '" class="valid">' +
                     data[i].name + '</label></dt><dd><dl class="cl permission-list2"><dd>';
                 var children_data = data[i].children;
                 for(j=0;j<children_data.length;j++){
@@ -133,7 +134,7 @@
             layer.close(ld);
             wg = layer.open({
               type: 1, //Page层类型
-              area: ['1000px', '600px'],
+              area: ['900px', '500px'],
               title: '群组 [' + group_name + '] 权限',
               shade: 0.6, //遮罩透明度
               shadeClose: false,
@@ -141,6 +142,7 @@
               content: html,
               closeBtn: 2,
               scrollbar: true,
+              move: false,
             });
         });
     }
