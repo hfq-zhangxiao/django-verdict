@@ -4,6 +4,13 @@
 {% block content %}
 
     <div class="body-div">
+    <div class="layui-card layadmin-header">
+      <div class="layui-breadcrumb" style="visibility: visible;">
+          <span class="glyphicon glyphicon-home" style="margin-left: 15px;" aria-hidden="true"></span>
+          <span lay-separator="">/</span>
+          <span><cite>群组列表</cite></span>
+      </div>
+    </div>
     <div class="search-div">
         <div class="input-group">
             <input type="text" class="form-control" placeholder="请输入..." id="search" value="{{ name }}">
