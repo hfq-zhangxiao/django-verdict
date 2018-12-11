@@ -8,6 +8,7 @@ cache = verdict_settings.get('CACHE', {})
 
 if cache:
     prefix = cache.get('prefix', 'verdict')
+    timeout = cache.get('timeout', 60 * 60)
     redis_connection = {
         'host': cache.get('host', ''),
         'port': cache.get('port', ''),
@@ -16,9 +17,11 @@ if cache:
         'password': cache.get('password', ''),
     }
     cache_ops = {
-        'verdict.*': {'ops': 'all', 'timeout': 60*60},
-        user_model_label: {'ops': 'all', 'timeout': 60*60},
+        'verdict.*': {'ops': 'all'},
+        user_model_label: {'ops': 'all'},
     }
+    cache_ops_default = {'timeout': timeout}
     settings.CACHEOPS_REDIS = redis_connection
     settings.CACHEOPS = cache_ops
+    settings.CACHEOPS_DEFAULTS = cache_ops_default
     settings.CACHEOPS_PREFIX = lambda query: '%s:' % prefix
