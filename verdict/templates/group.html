@@ -116,7 +116,7 @@
         var group_user_url = "{% url 'verdict_group_permission' pk=0 %}".replace('/0/', '/' + group_id + '/');
         $.get(group_user_url, function(resp){
             var data = resp.result;
-            var html = '<div style="overflow:auto; padding: 15px;">';
+            var html = '<div id="gp_div" style="overflow:auto; padding: 15px;">';
             for(i=0;i<data.length;i++){
                 var pile = '<dl class="permission-list">' + '<dt onclick="foldselfwidgt(this, event)"><label>' +
                     '<input style="margin:4px 4px 0;" type="checkbox" value="" name="pile" id="pile-' + i + '" class="valid">' +
@@ -183,12 +183,18 @@
     }
     
     
-    function foldselfwidgt(param, event) {
-        var ddv = $(param).parent().find("dd");
-        if(ddv.css("display") == "block") {
-            ddv.css("display", "none");
-        }else{
-            ddv.css("display", "block");
+    function foldselfwidgt(dt, evt) {
+        var dt_x = $(dt).offset().left;
+        var ev = evt || window.event;
+        var check_x = ev.pageX || ev.clientX + document.body.scroolLeft;
+        var relative_x = check_x - dt_x;
+        if (relative_x > 150){
+            var dl = $(dt).parent().find("dd");
+            if(dl.css("display") == "block") {
+                dl.css("display", "none");
+            }else{
+                dl.css("display", "block");
+            }
         }
     }
     
