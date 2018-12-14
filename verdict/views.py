@@ -13,9 +13,11 @@ from django.http.response import JsonResponse
 
 from . import models
 from . import exceptions
-from .shortcuts import get_user_default_permissions_name, get_user_obj, is_super_user
+from .signal import operation_log_signal
 from .decorator import required_permission
-from .utils import models_to_dict, get_offset_start_end, verify_page, list_result
+from .shortcuts import get_user_default_permissions_name, get_user_obj, is_super_user
+from .utils import models_to_dict, get_offset_start_end, verify_page, verify_coding, list_result, \
+    OperationType
 from .config import super_user_filter, user_always_exclude, user_always_filter, user_model_name_field, \
     user_model_email_field, default_permissions, default_permission_prefix, default_pile_name, \
     manage_menu_permissions
@@ -47,10 +49,8 @@ class UserTemplate(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         page = verify_page(self.request)
-        name = self.request.GET.get('name', '')
+        name = verify_coding(self.request.GET.get('name', ''))
         if name:
-            if isinstance(name, unicode):
-                name = name.encode('utf-8')
             name_where = {'%s__contains' % user_model_name_field: name}
             email_where = {'%s__contains' % user_model_email_field: name}
             query_set = self.query_set.filter(Q(**name_where) | Q(**email_where))
@@ -85,10 +85,8 @@ class PermissionViewSet(generic.View):
     @required_permission('_verdict_permission.read')
     def get(self, request):
         page = verify_page(request)
-        name = request.GET.get('name', '')
+        name = verify_coding(request.GET.get('name', ''))
         if name:
-            if isinstance(name, unicode):
-                name = name.encode('utf-8')
             query_set = self.query_set.filter(Q(name__contains=name) | Q(description__contains=name))
         else:
             query_set = self.query_set
@@ -107,12 +105,25 @@ class PermissionViewSet(generic.View):
         if not required_fields <= frozenset(request.POST.keys()):
             raise exceptions.MissingFields('missing fields: %s' % list(
                 (required_fields - frozenset(request.POST.keys()))))
-        if (request.POST['name'].strip()).startswith(default_permission_prefix):
+
+        name = verify_coding(request.POST['name'])
+        description = verify_coding(request.POST['description'])
+
+        if name.startswith(default_permission_prefix):
             return JsonResponse(data=dict(error='invalid name'), status=400)
-        if models.Group.objects.filter(state=1, name=request.POST['name'].strip()).exists():
+        if models.Group.objects.filter(state=1, name=name).exists():
             return JsonResponse(data=dict(error='name already exist'), status=400)
-        obj = models.Permission.objects.create(
-            name=request.POST['name'].strip(), description=request.POST['description'].strip())
+
+        obj = models.Permission.objects.create(name=name, description=description)
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.CREATE,
+            'title': '添加权限[%s]' % name,
+            'after': models_to_dict(obj),
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=models_to_dict(obj), status=201)
 
 
@@ -123,7 +134,17 @@ class PermissionUpdateDelete(generic.View):
         obj = get_object_or_404(models.Permission, pk=pk)
         if obj.name.startswith(default_permission_prefix):
             return JsonResponse(data=dict(error='can not be deleted'), status=403)
+        before = models_to_dict(obj)
         obj.delete()
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.DELETE,
+            'title': '删除权限[%s]' % verify_coding(before['name']),
+            'before': before,
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=dict(), status=204)
 
     @required_permission('_verdict_permission.update')
@@ -131,12 +152,23 @@ class PermissionUpdateDelete(generic.View):
         obj = get_object_or_404(models.Permission, pk=pk)
         if obj.name.startswith(default_permission_prefix):
             return JsonResponse(data=dict(error='can not be modified'), status=403)
+        before = models_to_dict(obj)
         data = QueryDict(request.body)
         if data.get('name'):
-            obj.name = data['name'].strip()
+            obj.name = verify_coding(data['name'])
         if data.get('description'):
-            obj.description = data['description'].strip()
+            obj.description = verify_coding(data['description'])
         obj.save()
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.UPDATE,
+            'title': '修改权限[%s]' % before['name'],
+            'before': before,
+            'after': models_to_dict(obj),
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=dict())
 
 
@@ -154,10 +186,8 @@ class PileViewSet(generic.View):
     @required_permission('_verdict_pile.read')
     def get(self, request):
         page = verify_page(request)
-        name = request.GET.get('name', '')
+        name = verify_coding(request.GET.get('name', ''))
         if name:
-            if isinstance(name, unicode):
-                name = name.encode('utf-8')
             query_set = self.query_set.filter(name__contains=name)
         else:
             query_set = self.query_set
@@ -184,14 +214,21 @@ class PileViewSet(generic.View):
         if not required_fields <= frozenset(request.POST.keys()):
             raise exceptions.MissingFields('missing fields: %s' % list(
                 (required_fields - frozenset(request.POST.keys()))))
-        name = request.POST['name'].strip()
-        if isinstance(name, unicode):
-            name = name.encode('utf-8')
-        if name == default_pile_name:
+        name = verify_coding(request.POST['name'])
+        if name == verify_coding(default_pile_name):
             return JsonResponse(data=dict(error='invalid name'), status=400)
         if models.Group.objects.filter(state=1, name=name).exists():
             return JsonResponse(data=dict(error='name already exist'), status=400)
         obj = models.Pile.objects.create(name=name)
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.CREATE,
+            'title': '添加权限集[%s]' % name,
+            'after': models_to_dict(obj),
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=models_to_dict(obj), status=201)
 
 
@@ -209,20 +246,41 @@ class PileUpdateDeleteViewSet(generic.View):
     @required_permission('_verdict_pile.delete')
     def delete(self, request, pk):
         obj = get_object_or_404(models.Pile, pk=pk)
-        if obj.name == default_pile_name:
+        if obj.id == default_pile.id:
             return JsonResponse(data=dict(error='can not be deleted'), status=400)
+        before = models_to_dict(obj)
         obj.delete()
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.DELETE,
+            'title': '删除权限集[%s]' % before['name'],
+            'before': before,
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=dict(), status=204)
 
     @required_permission('_verdict_pile.update')
     def patch(self, request, pk):
         obj = get_object_or_404(models.Pile, pk=pk)
-        if obj.name == default_pile_name:
+        if obj.id == default_pile.id:
             return JsonResponse(data=dict(error='can not be modified'), status=403)
+        before = models_to_dict(obj)
         data = QueryDict(request.body)
         if data.get('name'):
-            obj.name = data['name'].strip()
+            obj.name = verify_coding(data['name'])
         obj.save()
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.UPDATE,
+            'title': '修改权限集[%s]' % before['name'],
+            'before': before,
+            'after': models_to_dict(obj),
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=dict())
 
 
@@ -234,6 +292,10 @@ class PilePermissionViewSet(generic.View):
         permissions = request.POST.get('permissions')
         if not permissions:
             return JsonResponse(data=dict(error='missing fields'), status=400)
+
+        has_permissions = map(lambda x: x['permission'],
+                              models.PermissionPile.objects.filter(state=1, pile=pile).values('permission'))
+
         permissions = map(lambda x: int(x.strip()), permissions.strip().split(','))
         pile_permission_set = list()
         for permission_id in permissions:
@@ -245,6 +307,22 @@ class PilePermissionViewSet(generic.View):
                     error='permission<%s> already exist in a pile' % permission_id), status=400)
             pile_permission_set.append(models.PermissionPile(pile=pile, permission=permission))
         models.PermissionPile.objects.bulk_create(pile_permission_set)
+
+        pile = models_to_dict(pile)
+        before = dict(permission=has_permissions)
+        before.update(pile)
+        after = dict(permission=permissions)
+        after.update(pile)
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.CREATE,
+            'title': '添加权限集[%s]权限' % verify_coding(pile['name']),
+            'before': before,
+            'after': after,
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=dict())
 
 
@@ -254,10 +332,20 @@ class PilePermissionDelete(generic.View):
     def delete(self, request, pile_id, pk):
         pile = get_object_or_404(models.Pile, pk=pile_id)
         permission = get_object_or_404(models.Permission, pk=pk)
-        obj = models.PermissionPile.objects.filter(state=1, permission=permission, pile=pile)
-        if not obj.exists():
+        obj = models.PermissionPile.objects.filter(state=1, permission=permission, pile=pile).first()
+        if not obj:
             return JsonResponse(data=dict(error='permission not in the pile'), status=400)
+        before = models_to_dict(obj)
         obj.delete()
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.DELETE,
+            'title': '删除权限集[%s]权限[%s]' % (verify_coding(pile.name), verify_coding(permission.name)),
+            'before': before,
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=dict())
 
 
@@ -276,10 +364,8 @@ class GroupViewSet(generic.View):
     @required_permission('_verdict_group.read')
     def get(self, request):
         page = verify_page(request)
-        name = request.GET.get('name', '')
+        name = verify_coding(request.GET.get('name', ''))
         if name:
-            if isinstance(name, unicode):
-                name = name.encode('utf-8')
             query_set = self.query_set.filter(Q(name__contains=name) | Q(description__contains=name))
         else:
             query_set = self.query_set
@@ -302,10 +388,20 @@ class GroupViewSet(generic.View):
         if not required_fields <= frozenset(request.POST.keys()):
             raise exceptions.MissingFields('missing fields: %s' % list(
                 (required_fields - frozenset(request.POST.keys()))))
-        if models.Group.objects.filter(state=1, name=request.POST['name'].strip()).exists():
+        name = verify_coding(request.POST['name'])
+        description = verify_coding(request.POST['description'])
+        if models.Group.objects.filter(state=1, name=name).exists():
             return JsonResponse(data=dict(error='name already exist'), status=400)
-        obj = models.Group.objects.create(
-            name=request.POST['name'].strip(), description=request.POST['description'].strip())
+        obj = models.Group.objects.create(name=name.strip(), description=description)
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.CREATE,
+            'title': '添加群组[%s]' % name,
+            'after': models_to_dict(obj),
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=models_to_dict(obj), status=201)
 
 
@@ -314,18 +410,39 @@ class GroupUpdate(generic.View):
     @required_permission('_verdict_group.delete')
     def delete(self, request, pk):
         obj = get_object_or_404(models.Group, pk=pk)
+        before = models_to_dict(obj)
         obj.delete()
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.DELETE,
+            'title': '删除群组[%s]' % verify_coding(before['name']),
+            'before': before,
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=dict(), status=204)
 
     @required_permission('_verdict_group.update')
     def patch(self, request, pk):
         obj = get_object_or_404(models.Group, pk=pk)
+        before = models_to_dict(obj)
         data = QueryDict(request.body)
         if data.get('name'):
-            obj.name = data['name'].strip()
+            obj.name = verify_coding(data['name'])
         if data.get('description'):
-            obj.description = data['description'].strip()
+            obj.description = verify_coding(data['description'])
         obj.save()
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.UPDATE,
+            'title': '修改群组[%s]' % verify_coding(before['name']),
+            'before': before,
+            'after': models_to_dict(obj),
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=dict())
 
 
@@ -364,10 +481,10 @@ class GroupPermissionViewSet(generic.View):
     @required_permission('_verdict_group_permission.update')
     def patch(self, request, pk):
         obj = get_object_or_404(models.Group, pk=pk)
+        group = models_to_dict(obj)
         data = QueryDict(request.body)
         if data.get('permissions'):
-            permissions = data.get('permissions')
-            permissions = map(lambda x: int(x.strip()), permissions.strip().split(','))
+            permissions = map(lambda x: int(x.strip()), data.get('permissions').strip().split(','))
         else:
             permissions = list()
 
@@ -394,6 +511,21 @@ class GroupPermissionViewSet(generic.View):
                 state=1,
                 permission__id__in=list(delete_permission),
             ).delete()
+
+        before = dict(permission=has_permissions)
+        before.update(group)
+        after = dict(permission=permissions)
+        after.update(group)
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.UPDATE,
+            'title': '修改群组[%s]权限' % verify_coding(group['name']),
+            'before': before,
+            'after': after,
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=dict())
 
 
@@ -423,7 +555,17 @@ class GroupUserViewSet(generic.View):
 
         if models.GroupUser.objects.filter(state=1, user=user).exists():
             return JsonResponse(data=dict(error='user joined group already'), status=400)
-        models.GroupUser.objects.create(group=group, user=user)
+        obj = models.GroupUser.objects.create(group=group, user=user)
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.CREATE,
+            'title': '添加群组[%s]成员[%s]' % (
+                verify_coding(group.name), verify_coding(getattr(user, user_model_name_field))),
+            'after': models_to_dict(obj),
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=dict())
 
     @required_permission('_verdict_group_user.update')
@@ -431,8 +573,19 @@ class GroupUserViewSet(generic.View):
         group = get_object_or_404(models.Group, pk=gid)
         user = get_object_or_404(get_user_model(), pk=uid)
 
-        obj = models.GroupUser.objects.filter(state=1, user=user, group=group)
-        if not obj.exists():
+        obj = models.GroupUser.objects.filter(state=1, user=user, group=group).first()
+        if not obj:
             return JsonResponse(data=dict(error='user are not in the group'), status=400)
+        before = models_to_dict(obj)
         obj.delete()
+
+        named_args = {
+            'user': get_user_obj(request),
+            'type': OperationType.DELETE,
+            'title': '删除群组[%s]成员[%s]' % (
+                verify_coding(group.name), verify_coding(getattr(user, user_model_name_field))),
+            'before': before,
+        }
+        operation_log_signal.send(self.__class__, **named_args)
+
         return JsonResponse(data=dict())

@@ -1,7 +1,9 @@
-import datetime
 import math
+import json
+import datetime
 
 from .config import PAGE_LIMIT
+from .models import OperationLog
 from .shortcuts import get_user_default_permissions_name
 
 
@@ -40,6 +42,14 @@ def validate_permission(permission):
     return permission
 
 
+def verify_coding(ch, strip=True):
+    if isinstance(ch, unicode):
+        ch = ch.encode('utf-8')
+    if strip and ch:
+        return ch.strip()
+    return ch
+
+
 def verify_page(request):
     page = request.GET.get('page', 1)
     try:
@@ -73,3 +83,22 @@ def list_result(dj_request, result, total, page, **kwargs):
     if kwargs:
         context.update(kwargs)
     return context
+
+
+class OperationType(object):
+    READ = 0
+    CREATE = 1
+    DELETE = 2
+    UPDATE = 3
+
+
+def user_operation_log_cb(**kwargs):
+    required_args = frozenset(['user', 'type', 'title'])
+    if required_args.issubset(frozenset(kwargs.keys())):
+        OperationLog.objects.create(
+            user=kwargs['user'],
+            type=kwargs['type'],
+            title=kwargs['title'],
+            before=json.dumps(kwargs['before']) if kwargs.get('before') else '',
+            after=json.dumps(kwargs['after']) if kwargs.get('after') else ''
+        )

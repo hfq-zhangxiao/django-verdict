@@ -63,8 +63,21 @@ class GroupUser(BaseModel):
 
     group = models.ForeignKey(Group, db_column='f_group_id', db_index=True)
     user = models.ForeignKey(user_model_label, db_column='f_user_id',
-                             related_name='user_id', db_index=True)
+                             related_name='group_user_id', db_index=True)
 
     class Meta:
         db_table = 't_verdict_group_user'
         unique_together = ['group', 'user', 'state']
+
+
+class OperationLog(BaseModel):
+
+    user = models.ForeignKey(user_model_label, db_column='f_user_id',
+                             related_name='log_user_id', db_index=True)
+    title = models.CharField(db_column='f_title', max_length=200)
+    before = models.TextField(db_column='f_before')
+    after = models.TextField(db_column='f_after')
+    type = models.IntegerField(db_column='f_type')
+
+    class Meta:
+        db_table = 't_verdict_operation_log'

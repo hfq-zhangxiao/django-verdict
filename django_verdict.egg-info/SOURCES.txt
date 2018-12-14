@@ -16,6 +16,7 @@ verdict/exceptions.py
 verdict/mixin.py
 verdict/models.py
 verdict/shortcuts.py
+verdict/signal.py
 verdict/tests.py
 verdict/urls.py
 verdict/utils.py
@@ -33,6 +34,7 @@ verdict/static/fonts/glyphicons-halflings-regular.eot
 verdict/static/fonts/glyphicons-halflings-regular.ttf
 verdict/static/fonts/glyphicons-halflings-regular.woff
 verdict/static/images/close.png
+verdict/static/images/favicon.ico
 verdict/static/js/bootstrap.min.js
 verdict/static/js/jquery.min.js
 verdict/static/js/layer.js
