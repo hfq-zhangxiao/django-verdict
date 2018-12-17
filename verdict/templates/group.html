@@ -87,11 +87,11 @@
                 return;
             }
             var html = '<div style="overflow:auto; padding: 15px;">';
-            html += '<table class="table table-border table-bordered table-hover table-bg table-sort">';
-            html += '<thead><tr class="text-c"><th width="40%">用户名</th><th>邮箱</th></tr></thead>';
+            html += '<table class="table table-bordered table-striped">';
+            html += '<thead><tr class="success"><th width="40%" class="tb-th">用户名</th><th class="tb-th">邮箱</th></tr></thead>';
             html += '<tbody>';
             for(i=0;i<data.length;i++){
-                html += '<tr class="text-c"><td>' + data[i].name + '</td>' + '<td>' + data[i].email + '</td></tr>';
+                html += '<tr><td class="tb-th">' + data[i].name + '</td>' + '<td class="tb-th">' + data[i].email + '</td></tr>';
             }
             html += '</tbody></table></div>';
             layer.close(ld);
